@@ -42,9 +42,9 @@ export function TrainingPage() {
 
   // Break reminder integration
   const breakReminder = useBreakReminder({
-    onReminder: () => {
+    onReminder: useCallback(() => {
       // Overlay auto-shown via breakReminder.active === true
-    },
+    }, []),
     isTyping: session.state === 'running',
   });
 
