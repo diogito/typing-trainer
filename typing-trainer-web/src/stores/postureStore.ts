@@ -12,30 +12,54 @@ interface PostureState {
   reset: () => Promise<void>;
 }
 
-export const usePostureStore = create<PostureState>((set) => ({
-  posture: { ...DEFAULT_POSTURE },
-  loading: false,
-  error: null,
-
-  load: async () => {
-    set({ loading: true, error: null });
-    try {
-      const stored = await storageService.loadPosture();
-      set({ posture: stored ?? { ...DEFAULT_POSTURE }, loading: false });
-    } catch {
-      set({ error: 'Failed to load posture settings', loading: false });
+// Synchronous initial posture from localStorage fallback
+function getInitialPosture(): PostureCalibration {
+  try {
+    const stored = localStorage.getItem('posture');
+    if (stored) {
+      return { ...DEFAULT_POSTURE, ...JSON.parse(stored) };
     }
-  },
+  } catch {
+    // ignore
+  }
+  return { ...DEFAULT_POSTURE };
+}
 
-  update: async (updates) => {
-    set((s) => ({
-      posture: { ...s.posture, ...updates },
-    }));
-    await storageService.savePosture({ ...usePostureStore.getState().posture, ...updates });
-  },
+export const usePostureStore = create<PostureState>((set) => {
+  const initialPosture = getInitialPosture();
 
-  reset: async () => {
-    set({ posture: { ...DEFAULT_POSTURE } });
-    await storageService.savePosture({ ...DEFAULT_POSTURE });
-  },
-}));
+  return {
+    posture: initialPosture,
+    loading: false,
+    error: null,
+
+    load: async () => {
+      set({ loading: true, error: null });
+      try {
+        const stored = await storageService.loadPosture();
+        set({ posture: stored ?? initialPosture, loading: false });
+      } catch {
+        set({ error: 'Failed to load posture settings', loading: false });
+      }
+    },
+
+    update: async (updates) => {
+      set((s) => {
+        const newPosture = { ...s.posture, ...updates };
+        // Also persist to localStorage for synchronous access
+        try {
+          localStorage.setItem('posture', JSON.stringify(newPosture));
+        } catch {
+          // ignore
+        }
+        return { posture: newPosture };
+      });
+      await storageService.savePosture({ ...usePostureStore.getState().posture, ...updates });
+    },
+
+    reset: async () => {
+      set({ posture: { ...DEFAULT_POSTURE } });
+      await storageService.savePosture({ ...DEFAULT_POSTURE });
+    },
+  };
+});

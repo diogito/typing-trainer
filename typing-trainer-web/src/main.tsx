@@ -26,6 +26,10 @@ declare module '@tanstack/react-router' {
   }
 }
 
+// Load persisted posture settings on app startup
+import { usePostureStore } from '@/stores/postureStore';
+usePostureStore.getState().load();
+
 function App() {
   return <RouterProvider router={router} />;
 }
