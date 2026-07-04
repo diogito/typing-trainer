@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { SessionState, SessionMetrics, KeystrokeEvent } from '@/types';
 import { SessionEngine } from '@/core/session/sessionEngine';
+import { useKeyboardStore } from './keyboardStore';
+import { useLayoutStore } from './layoutStore';
 
 
 interface SessionSlice {
@@ -31,8 +33,13 @@ export const useSessionStore = create<SessionSlice>((set, get) => ({
   engine: null,
 
   init: (layoutId: string) => {
-    const engine = new SessionEngine(layoutId);
+    const layout = useLayoutStore.getState().getLayout();
+    const keyColumns = layout
+      ? Object.fromEntries(layout.keys.map((k): [string, number] => [k.scancode, k.position.col]))
+      : {};
+    const engine = new SessionEngine(layoutId, keyColumns);
     const state = engine.getState();
+    useKeyboardStore.getState().resetErrors();
     set({ state, engine, metrics: null });
   },
 

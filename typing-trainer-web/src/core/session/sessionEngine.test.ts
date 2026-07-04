@@ -142,6 +142,108 @@ describe('SessionEngine lifecycle', () => {
   });
 });
 
+describe('sessionEngine stop() column tracking', () => {
+  it('uses real column from keyColumns for error hand aggregation', () => {
+    // Key at column 7 → right hand
+    const engine = new SessionEngine('qwerty-es', { KC_R: 7, KC_S: 2 });
+    engine.start();
+
+    for (let i = 0; i < 80; i++) {
+      engine.recordKeystroke({
+        code: 'KeyA',
+        key: 'a',
+        scancode: 'KC_A',
+        timestamp: i * 100,
+        finger: 'pinky',
+        actualFinger: 'pinky',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+      } as KeystrokeEvent);
+    }
+
+    // 10 errors on KC_R (col 7 → right)
+    for (let i = 0; i < 10; i++) {
+      engine.recordKeystroke({
+        code: 'KeyR',
+        key: 'r',
+        scancode: 'KC_R',
+        timestamp: (80 + i) * 100,
+        finger: 'index',
+        actualFinger: 'index',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+        error: 'wrong-key',
+        direction: 'down',
+      } as KeystrokeEvent);
+    }
+
+    // 10 errors on KC_S (col 2 → left)
+    for (let i = 0; i < 10; i++) {
+      engine.recordKeystroke({
+        code: 'KeyS',
+        key: 's',
+        scancode: 'KC_S',
+        timestamp: (90 + i) * 100,
+        finger: 'ring',
+        actualFinger: 'ring',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+        error: 'wrong-key',
+        direction: 'down',
+      } as KeystrokeEvent);
+    }
+
+    engine.stop();
+    const metrics = engine.getMetrics()!;
+    expect(metrics.errors.byHand.right).toBe(10);
+    expect(metrics.errors.byHand.left).toBe(10);
+  });
+
+  it('defaults to column 1 when keyColumns is empty', () => {
+    const engine = new SessionEngine('qwerty-es', {});
+    engine.start();
+
+    for (let i = 0; i < 95; i++) {
+      engine.recordKeystroke({
+        code: 'KeyA',
+        key: 'a',
+        scancode: 'KC_A',
+        timestamp: i * 100,
+        finger: 'pinky',
+        actualFinger: 'pinky',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+      } as KeystrokeEvent);
+    }
+
+    for (let i = 0; i < 5; i++) {
+      engine.recordKeystroke({
+        code: 'KeyX',
+        key: 'x',
+        scancode: 'KC_X',
+        timestamp: (95 + i) * 100,
+        finger: 'pinky',
+        actualFinger: 'pinky',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+        error: 'wrong-key',
+        direction: 'down',
+      } as KeystrokeEvent);
+    }
+
+    engine.stop();
+    const metrics = engine.getMetrics()!;
+    // col=1 (default) → left hand
+    expect(metrics.errors.byHand.left).toBe(5);
+    expect(metrics.errors.byHand.right).toBe(0);
+  });
+});
+
 describe('SessionEngine.isModifier', () => {
   it('identifies modifier keycodes', () => {
     expect(SessionEngine.isModifier('KC_LCTRL')).toBe(true);

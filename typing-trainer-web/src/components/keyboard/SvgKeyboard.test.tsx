@@ -1,7 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { SvgKeyboard } from './SvgKeyboard';
+import { useKeyboardStore } from '@/stores/keyboardStore';
 
 describe('SvgKeyboard', () => {
   it('renders without crashing', () => {
@@ -51,5 +52,25 @@ describe('SvgKeyboard', () => {
     expect(wrapper).toHaveClass('transition-opacity');
     expect(wrapper).toHaveClass('duration-300');
     expect(wrapper).toHaveClass('ease-in-out');
+  });
+});
+
+describe('SvgKeyboard error heatmap', () => {
+  beforeEach(() => {
+    useKeyboardStore.getState().resetErrors();
+  });
+
+  it('renders error-heatmap group when errors exist', () => {
+    useKeyboardStore.getState().recordError('KC_Q');
+
+    const { container } = render(<SvgKeyboard />);
+    const heatmap = container.querySelector('.error-heatmap');
+    expect(heatmap).toBeInTheDocument();
+  });
+
+  it('renders no heatmap when no errors', () => {
+    const { container } = render(<SvgKeyboard />);
+    const heatmap = container.querySelector('.error-heatmap');
+    expect(heatmap).toBeNull();
   });
 });

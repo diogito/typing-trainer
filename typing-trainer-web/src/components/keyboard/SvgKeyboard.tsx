@@ -4,6 +4,54 @@ import { useKeyboardContent } from './useKeyboardContent';
 import type { Finger } from '@/types';
 // Layout store is used via useKeyboardContent
 
+/**
+ * Compute error overlay opacity from error count.
+ * Linear scale: 0 errors = 0, 1 error = 0.15, 5+ errors = 0.5+, capped at 0.7.
+ */
+function computeErrorOpacity(count: number): number {
+  if (count <= 0) return 0;
+  return Math.min(count * 0.15, 0.7);
+}
+
+interface KeyboardErrorOverlayProps {
+  fingerErrors: Record<string, number>;
+  keyPositions: Map<string, { x: number; y: number; width: number; height: number }>;
+}
+
+/**
+ * Renders a red error overlay on keys that have accumulated errors.
+ * Opacity is proportional to error count (capped at 0.7).
+ * Rendered as a separate SVG layer that does not interfere with key interactions.
+ */
+export function KeyboardErrorOverlay({ fingerErrors, keyPositions }: KeyboardErrorOverlayProps) {
+  const errorScancodes = Object.keys(fingerErrors).filter((sc) => fingerErrors[sc] > 0);
+  if (errorScancodes.length === 0) return null;
+
+  return (
+    <g className="error-heatmap pointer-events-none">
+      {errorScancodes.map((scancode) => {
+        const pos = keyPositions.get(scancode);
+        if (!pos) return null;
+        const opacity = computeErrorOpacity(fingerErrors[scancode]);
+        return (
+          <rect
+            key={`error-${scancode}`}
+            x={pos.x}
+            y={pos.y}
+            width={pos.width}
+            height={pos.height}
+            rx={6}
+            fill="#ef4444"
+            fillOpacity={opacity}
+            className="pointer-events-none"
+            style={{ transition: 'fill-opacity 0.3s ease' }}
+          />
+        );
+      })}
+    </g>
+  );
+}
+
 interface KeyboardLayerOverlayProps {
   activeLayer: string;
   layerMap?: Record<string, { [key: string]: string }>;
@@ -101,7 +149,8 @@ interface SvgKeyboardProps {
 
 /**
  * SVG Keyboard — renders all keys from the current layout as an interactive SVG.
- * Supports finger coloring, active key highlighting, layer overlays, and responsive scaling.
+ * Supports finger coloring, active key highlighting, layer overlays,
+ * error heatmap, and responsive scaling.
  * Accepts an optional opacity for mirror mode.
  */
 export function SvgKeyboard({ className = '', opacity }: SvgKeyboardProps) {
@@ -109,6 +158,8 @@ export function SvgKeyboard({ className = '', opacity }: SvgKeyboardProps) {
     keys,
     keyboardWidth,
     keyboardHeight,
+    keyPositions,
+    fingerErrors,
     keyDown,
     keyUp,
   } = useKeyboardContent();
@@ -155,6 +206,9 @@ export function SvgKeyboard({ className = '', opacity }: SvgKeyboardProps) {
             scale={scale}
           />
         ))}
+
+        {/* Error heatmap overlay — sits above keys, does not block interactions */}
+        <KeyboardErrorOverlay fingerErrors={fingerErrors} keyPositions={keyPositions} />
       </svg>
     </div>
   );

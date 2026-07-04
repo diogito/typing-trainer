@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useUISlice } from '@/stores/uiStore';
+import { useKeyboardStore } from '@/stores/keyboardStore';
 import { useEventCapture } from '@/core/capture/eventCapture';
 import type { KeystrokeEvent } from '@/types';
 
@@ -31,6 +32,8 @@ export function TrainingPage() {
   const incrementMirrorProgress = useUISlice((s) => s.incrementMirrorProgress);
   const resetMirrorMode = useUISlice((s) => s.resetMirrorMode);
   const mirrorOpacity = useUISlice((s) => s.getMirrorOpacity());
+
+  const recordError = useKeyboardStore((s) => s.recordError);
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [activeLayoutId, setActiveLayoutId] = useState('');
@@ -71,11 +74,15 @@ export function TrainingPage() {
 
   const handleKeystroke = useCallback((event: KeystrokeEvent) => {
     recordKeystroke(event);
+    // Record live error for heatmap display
+    if (event.error === 'wrong-finger') {
+      recordError(event.scancode);
+    }
     // Increment mirror progress on correct keystrokes (no error)
     if (!event.error && mirrorMode.enabled) {
       incrementMirrorProgress();
     }
-  }, [recordKeystroke, mirrorMode.enabled, incrementMirrorProgress]);
+  }, [recordKeystroke, recordError, mirrorMode.enabled, incrementMirrorProgress]);
 
   // Get finger map from layout
   const fingerMap = layout?.fingerMap ?? {};
@@ -91,15 +98,17 @@ export function TrainingPage() {
   // Compute displayed stats
   const wpm = metrics?.wpm ?? 0;
   const accuracy = metrics?.accuracy ?? 100;
+  const precision = metrics?.precision ?? 0;
   const ks = metrics?.totalKeystrokes ?? 0;
   const elapsed = metrics ? Math.round(metrics.duration) : 0;
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
       {/* Stats bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <StatCard label="WPM" value={wpm} suffix=" wpm" />
         <StatCard label="Accuracy" value={accuracy} suffix="%" />
+        <StatCard label="Precision" value={precision} suffix="%" />
         <StatCard label="Keystrokes" value={ks} suffix=" ks" />
         <StatCard label="Time" value={elapsed} suffix="s" />
       </div>

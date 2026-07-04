@@ -9,10 +9,19 @@ export function getExpectedFinger(scancode: string, fingerMap: FingerMap): Finge
 
 /**
  * Detect if a keystroke has an error.
+ * Compares actualFinger against expectedFinger and returns 'wrong-finger'
+ * when they differ and actualFinger is known.
  */
-export function detectError(_event: KeystrokeEvent, _expectedFinger: Finger): ErrorType | undefined {
-  if (_event.isModifier) return undefined;
-  if (_event.error) return _event.error;
+export function detectError(event: KeystrokeEvent, expectedFinger: Finger): ErrorType | undefined {
+  if (event.isModifier) return undefined;
+  if (event.error) return event.error;
+
+  if (event.actualFinger && event.actualFinger !== 'unknown') {
+    if (!isCorrectFinger(event.actualFinger, expectedFinger)) {
+      return 'wrong-finger';
+    }
+  }
+
   return undefined;
 }
 

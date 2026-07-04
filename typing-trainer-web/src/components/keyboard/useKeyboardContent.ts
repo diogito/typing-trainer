@@ -4,12 +4,13 @@ import { useKeyboardStore } from '@/stores/keyboardStore';
 
 /**
  * Compute SVG keyboard content for a given layout.
- * Returns an array of key elements and layout metadata.
+ * Returns an array of key elements, layout metadata, and error data.
  */
 export function useKeyboardContent() {
   const layout = useLayoutStore((s) => s.getLayout());
   const activeScancodes = useKeyboardStore((s) => s.activeScancodes);
   const fingerColorScheme = useKeyboardStore((s) => s.fingerColorScheme);
+  const fingerErrors = useKeyboardStore((s) => s.fingerErrors);
 
   const keys = useMemo(() => {
     if (!layout) return [];
@@ -55,6 +56,22 @@ export function useKeyboardContent() {
     return Math.max(max, 300);
   }, [layout]);
 
+  const keyPositions = useMemo(() => {
+    if (!layout) return new Map<string, { x: number; y: number; width: number; height: number }>();
+    const positions = new Map<string, { x: number; y: number; width: number; height: number }>();
+    for (const key of layout.keys) {
+      const kWidth = key.position.width * 44;
+      const kHeight = key.position.height * 44;
+      positions.set(key.scancode, {
+        x: key.position.x,
+        y: key.position.y,
+        width: kWidth,
+        height: kHeight,
+      });
+    }
+    return positions;
+  }, [layout]);
+
   const keyDown = useCallback((scancode: string) => {
     useKeyboardStore.getState().keyDown(scancode);
   }, []);
@@ -67,6 +84,8 @@ export function useKeyboardContent() {
     keys,
     keyboardWidth,
     keyboardHeight,
+    keyPositions,
+    fingerErrors,
     keyDown,
     keyUp,
   };

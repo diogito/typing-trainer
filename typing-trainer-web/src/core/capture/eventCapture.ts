@@ -1,7 +1,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import type { FingerMap, KeystrokeEvent } from '@/types';
 import { getScancode, getKcCodeFromDomCode, KC_CODE_MAP } from '@/lib/kcCodeMap';
-import { getExpectedFinger } from '@/core/keyboard/fingerDetection';
+import { getExpectedFinger, detectError } from '@/core/keyboard/fingerDetection';
 
 interface UseEventCaptureOptions {
   onKeystroke?: (event: KeystrokeEvent) => void;
@@ -67,8 +67,25 @@ export function useEventCapture({
       // Determine expected finger
       const expectedFinger = getExpectedFinger(kcCode, fingerMap);
 
-      // Detect wrong finger (simplified — actual finger detection needs more context)
-      let error: KeystrokeEvent['error'] | undefined;
+      // Optimistic model: assume user uses the expected finger
+      const actualFinger = expectedFinger;
+
+      // Detect wrong-finger by comparing actual vs expected
+      const error = detectError(
+        {
+          code: domCode,
+          key: event.key,
+          scancode: sc.code,
+          timestamp: pressTime,
+          finger: expectedFinger,
+          actualFinger,
+          isModifier: false,
+          modifiers: [...modifiersRef.current],
+          layer: activeLayer,
+          error: undefined,
+        } as KeystrokeEvent,
+        expectedFinger,
+      );
 
       const keystroke: KeystrokeEvent = {
         code: domCode,
@@ -76,7 +93,7 @@ export function useEventCapture({
         scancode: sc.code,
         timestamp: pressTime,
         finger: expectedFinger,
-        actualFinger: 'unknown',
+        actualFinger,
         isModifier: false,
         modifiers: [...modifiersRef.current],
         layer: activeLayer,
@@ -99,6 +116,12 @@ export function useEventCapture({
       const releaseTime = performance.now();
       pressTimesRef.current.set(kcCode, releaseTime);
 
+      // Look up expected finger for key-up (optimistic model)
+      const mapEntry = KC_CODE_MAP[kcCode];
+      const keyScancode = mapEntry ? mapEntry.code : kcCode;
+      const expectedFingerUp = keyScancode ? getExpectedFinger(keyScancode, fingerMap) : 'other';
+      const actualFingerUp = expectedFingerUp;
+
       // Record hold duration
       const keystroke: KeystrokeEvent = {
         code: domCode,
@@ -107,8 +130,8 @@ export function useEventCapture({
         timestamp: pressTimesRef.current.get(kcCode) ?? releaseTime,
         releaseTime,
         holdDuration: releaseTime - (pressTimesRef.current.get(kcCode) ?? releaseTime),
-        finger: 'other',
-        actualFinger: 'unknown',
+        finger: expectedFingerUp,
+        actualFinger: actualFingerUp,
         isModifier: false,
         modifiers: [],
         layer: activeLayer,

@@ -36,9 +36,11 @@ export function createSession(layoutId: string): SessionState {
  */
 export class SessionEngine {
   private state: SessionState;
+  private keyColumns: Record<string, number>;
 
-  constructor(layoutId: string) {
+  constructor(layoutId: string, keyColumns: Record<string, number> = {}) {
     this.state = createSession(layoutId);
+    this.keyColumns = keyColumns;
   }
 
   /**
@@ -99,7 +101,7 @@ export class SessionEngine {
 
     for (const keystroke of this.state.keystrokes) {
       if (keystroke.error) {
-        const col = 1; // placeholder — real col comes from keyboard layout
+        const col = this.keyColumns[keystroke.scancode] ?? 1;
         const dir = keystroke.direction;
         if (dir === 'down' || dir === 'up') {
           recordError(
