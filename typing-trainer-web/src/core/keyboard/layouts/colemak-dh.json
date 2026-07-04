@@ -1,0 +1,1014 @@
+{
+  "id": "colemak-dh",
+  "name": "Colemak-DH",
+  "description": "Spanish QWERTY with Ñ on home row",
+  "keys": [
+    {
+      "scancode": "KC_ESC",
+      "position": {
+        "col": 1,
+        "row": 0,
+        "width": 1.5,
+        "height": 1,
+        "x": 2,
+        "y": 2
+      },
+      "finger": "other",
+      "labels": {
+        "base": "Esc"
+      }
+    },
+    {
+      "scancode": "KC_TILDE",
+      "position": {
+        "col": 3,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 72,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "`"
+      }
+    },
+    {
+      "scancode": "KC_1",
+      "position": {
+        "col": 4,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 117,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "1",
+        "numbers": "!"
+      }
+    },
+    {
+      "scancode": "KC_2",
+      "position": {
+        "col": 5,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 162,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "2",
+        "numbers": "@"
+      }
+    },
+    {
+      "scancode": "KC_3",
+      "position": {
+        "col": 6,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 207,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "3",
+        "numbers": "#"
+      }
+    },
+    {
+      "scancode": "KC_4",
+      "position": {
+        "col": 7,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 252,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "4",
+        "numbers": "$"
+      }
+    },
+    {
+      "scancode": "KC_5",
+      "position": {
+        "col": 8,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 297,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "5",
+        "numbers": "%"
+      }
+    },
+    {
+      "scancode": "KC_6",
+      "position": {
+        "col": 9,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 342,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "6",
+        "numbers": "^"
+      }
+    },
+    {
+      "scancode": "KC_7",
+      "position": {
+        "col": 10,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 387,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "7",
+        "numbers": "&"
+      }
+    },
+    {
+      "scancode": "KC_8",
+      "position": {
+        "col": 11,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 432,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "8",
+        "numbers": "*"
+      }
+    },
+    {
+      "scancode": "KC_9",
+      "position": {
+        "col": 12,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 477,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "9",
+        "numbers": "("
+      }
+    },
+    {
+      "scancode": "KC_0",
+      "position": {
+        "col": 13,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 522,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "0",
+        "numbers": ")"
+      }
+    },
+    {
+      "scancode": "KC_MINUS",
+      "position": {
+        "col": 14,
+        "row": 1,
+        "width": 1,
+        "height": 1,
+        "x": 567,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "-"
+      }
+    },
+    {
+      "scancode": "KC_EQUAL",
+      "position": {
+        "col": 15,
+        "row": 1,
+        "width": 1.5,
+        "height": 1,
+        "x": 612,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "="
+      }
+    },
+    {
+      "scancode": "KC_BSPC",
+      "position": {
+        "col": 16.5,
+        "row": 1,
+        "width": 2.25,
+        "height": 1,
+        "x": 680,
+        "y": 57
+      },
+      "finger": "other",
+      "labels": {
+        "base": "Bsp"
+      }
+    },
+    {
+      "scancode": "KC_TAB",
+      "position": {
+        "col": 1,
+        "row": 2,
+        "width": 1.5,
+        "height": 1,
+        "x": 2,
+        "y": 112
+      },
+      "finger": "other",
+      "labels": {
+        "base": "Tab"
+      }
+    },
+    {
+      "scancode": "KC_Q",
+      "position": {
+        "col": 2.5,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 72,
+        "y": 112
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "Q"
+      }
+    },
+    {
+      "scancode": "KC_W",
+      "position": {
+        "col": 3.75,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 129,
+        "y": 112
+      },
+      "finger": "ring",
+      "labels": {
+        "base": "W"
+      }
+    },
+    {
+      "scancode": "KC_E",
+      "position": {
+        "col": 5,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 186,
+        "y": 112
+      },
+      "finger": "middle",
+      "labels": {
+        "base": "E"
+      }
+    },
+    {
+      "scancode": "KC_R",
+      "position": {
+        "col": 6.25,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 243,
+        "y": 112
+      },
+      "finger": "index",
+      "labels": {
+        "base": "R"
+      }
+    },
+    {
+      "scancode": "KC_T",
+      "position": {
+        "col": 7.5,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 300,
+        "y": 112
+      },
+      "finger": "index",
+      "labels": {
+        "base": "T"
+      }
+    },
+    {
+      "scancode": "KC_Y",
+      "position": {
+        "col": 8.75,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 357,
+        "y": 112
+      },
+      "finger": "index",
+      "labels": {
+        "base": "Y"
+      }
+    },
+    {
+      "scancode": "KC_U",
+      "position": {
+        "col": 10,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 414,
+        "y": 112
+      },
+      "finger": "index",
+      "labels": {
+        "base": "U"
+      }
+    },
+    {
+      "scancode": "KC_I",
+      "position": {
+        "col": 11.25,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 471,
+        "y": 112
+      },
+      "finger": "middle",
+      "labels": {
+        "base": "I"
+      }
+    },
+    {
+      "scancode": "KC_O",
+      "position": {
+        "col": 12.5,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 528,
+        "y": 112
+      },
+      "finger": "ring",
+      "labels": {
+        "base": "O"
+      }
+    },
+    {
+      "scancode": "KC_P",
+      "position": {
+        "col": 13.75,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 585,
+        "y": 112
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "P"
+      }
+    },
+    {
+      "scancode": "KC_LBRC",
+      "position": {
+        "col": 15,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 642,
+        "y": 112
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "["
+      }
+    },
+    {
+      "scancode": "KC_RBRC",
+      "position": {
+        "col": 16.25,
+        "row": 2,
+        "width": 1.25,
+        "height": 1,
+        "x": 699,
+        "y": 112
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "]"
+      }
+    },
+    {
+      "scancode": "KC_BSLS",
+      "position": {
+        "col": 17.5,
+        "row": 2,
+        "width": 1.5,
+        "height": 1,
+        "x": 756,
+        "y": 112
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "\\"
+      }
+    },
+    {
+      "scancode": "KC_LCTRL",
+      "position": {
+        "col": 1,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 2,
+        "y": 167
+      },
+      "finger": "other",
+      "labels": {
+        "base": "Ctrl"
+      }
+    },
+    {
+      "scancode": "KC_LGUI",
+      "position": {
+        "col": 2.5,
+        "row": 3,
+        "width": 1.25,
+        "height": 1,
+        "x": 72,
+        "y": 167
+      },
+      "finger": "other",
+      "labels": {
+        "base": "Gui"
+      }
+    },
+    {
+      "scancode": "KC_LALT",
+      "position": {
+        "col": 3.75,
+        "row": 3,
+        "width": 1.25,
+        "height": 1,
+        "x": 129,
+        "y": 167
+      },
+      "finger": "other",
+      "labels": {
+        "base": "Alt"
+      }
+    },
+    {
+      "scancode": "KC_A",
+      "position": {
+        "col": 5,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 186,
+        "y": 167
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "A"
+      }
+    },
+    {
+      "scancode": "KC_S",
+      "position": {
+        "col": 6.5,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 249,
+        "y": 167
+      },
+      "finger": "ring",
+      "labels": {
+        "base": "S"
+      }
+    },
+    {
+      "scancode": "KC_D",
+      "position": {
+        "col": 8,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 312,
+        "y": 167
+      },
+      "finger": "middle",
+      "labels": {
+        "base": "D"
+      }
+    },
+    {
+      "scancode": "KC_F",
+      "position": {
+        "col": 9.5,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 375,
+        "y": 167
+      },
+      "finger": "index",
+      "labels": {
+        "base": "F"
+      }
+    },
+    {
+      "scancode": "KC_G",
+      "position": {
+        "col": 11,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 438,
+        "y": 167
+      },
+      "finger": "index",
+      "labels": {
+        "base": "G"
+      }
+    },
+    {
+      "scancode": "KC_H",
+      "position": {
+        "col": 12.5,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 501,
+        "y": 167
+      },
+      "finger": "index",
+      "labels": {
+        "base": "H"
+      }
+    },
+    {
+      "scancode": "KC_J",
+      "position": {
+        "col": 14,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 564,
+        "y": 167
+      },
+      "finger": "index",
+      "labels": {
+        "base": "J"
+      }
+    },
+    {
+      "scancode": "KC_K",
+      "position": {
+        "col": 15.5,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 627,
+        "y": 167
+      },
+      "finger": "middle",
+      "labels": {
+        "base": "K"
+      }
+    },
+    {
+      "scancode": "KC_L",
+      "position": {
+        "col": 17,
+        "row": 3,
+        "width": 1.5,
+        "height": 1,
+        "x": 690,
+        "y": 167
+      },
+      "finger": "ring",
+      "labels": {
+        "base": "L"
+      }
+    },
+    {
+      "scancode": "KC_SCOLON",
+      "position": {
+        "col": 18.5,
+        "row": 3,
+        "width": 1.25,
+        "height": 1,
+        "x": 753,
+        "y": 167
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": ";"
+      }
+    },
+    {
+      "scancode": "KC_QUOTE",
+      "position": {
+        "col": 19.75,
+        "row": 3,
+        "width": 1.25,
+        "height": 1,
+        "x": 804,
+        "y": 167
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "'"
+      }
+    },
+    {
+      "scancode": "KC_NNO",
+      "position": {
+        "col": 21,
+        "row": 3,
+        "width": 1.25,
+        "height": 1,
+        "x": 855,
+        "y": 167
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "Ñ"
+      }
+    },
+    {
+      "scancode": "KC_ENTER",
+      "position": {
+        "col": 22.25,
+        "row": 3,
+        "width": 2.25,
+        "height": 2,
+        "x": 906,
+        "y": 167
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "Enter"
+      },
+      "hasWashers": true
+    },
+    {
+      "scancode": "KC_Z",
+      "position": {
+        "col": 1,
+        "row": 4,
+        "width": 2,
+        "height": 1,
+        "x": 2,
+        "y": 222
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "Z"
+      }
+    },
+    {
+      "scancode": "KC_X",
+      "position": {
+        "col": 3,
+        "row": 4,
+        "width": 2,
+        "height": 1,
+        "x": 92,
+        "y": 222
+      },
+      "finger": "ring",
+      "labels": {
+        "base": "X"
+      }
+    },
+    {
+      "scancode": "KC_C",
+      "position": {
+        "col": 5,
+        "row": 4,
+        "width": 2,
+        "height": 1,
+        "x": 162,
+        "y": 222
+      },
+      "finger": "middle",
+      "labels": {
+        "base": "C"
+      }
+    },
+    {
+      "scancode": "KC_V",
+      "position": {
+        "col": 7,
+        "row": 4,
+        "width": 2,
+        "height": 1,
+        "x": 232,
+        "y": 222
+      },
+      "finger": "index",
+      "labels": {
+        "base": "V"
+      }
+    },
+    {
+      "scancode": "KC_B",
+      "position": {
+        "col": 9,
+        "row": 4,
+        "width": 2,
+        "height": 1,
+        "x": 302,
+        "y": 222
+      },
+      "finger": "index",
+      "labels": {
+        "base": "B"
+      }
+    },
+    {
+      "scancode": "KC_N",
+      "position": {
+        "col": 11,
+        "row": 4,
+        "width": 2,
+        "height": 1,
+        "x": 372,
+        "y": 222
+      },
+      "finger": "index",
+      "labels": {
+        "base": "N"
+      }
+    },
+    {
+      "scancode": "KC_M",
+      "position": {
+        "col": 13,
+        "row": 4,
+        "width": 2,
+        "height": 1,
+        "x": 442,
+        "y": 222
+      },
+      "finger": "middle",
+      "labels": {
+        "base": "M"
+      }
+    },
+    {
+      "scancode": "KC_COMMA",
+      "position": {
+        "col": 15,
+        "row": 4,
+        "width": 1.5,
+        "height": 1,
+        "x": 512,
+        "y": 222
+      },
+      "finger": "ring",
+      "labels": {
+        "base": ","
+      }
+    },
+    {
+      "scancode": "KC_DOT",
+      "position": {
+        "col": 16.5,
+        "row": 4,
+        "width": 1.5,
+        "height": 1,
+        "x": 574,
+        "y": 222
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "."
+      }
+    },
+    {
+      "scancode": "KC_SLASH",
+      "position": {
+        "col": 18,
+        "row": 4,
+        "width": 1.5,
+        "height": 1,
+        "x": 636,
+        "y": 222
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "/"
+      }
+    },
+    {
+      "scancode": "KC_RSHIFT",
+      "position": {
+        "col": 19.5,
+        "row": 4,
+        "width": 2,
+        "height": 1,
+        "x": 698,
+        "y": 222
+      },
+      "finger": "pinky",
+      "labels": {
+        "base": "Shift"
+      }
+    },
+    {
+      "scancode": "KC_SPC",
+      "position": {
+        "col": 21.5,
+        "row": 4,
+        "width": 6,
+        "height": 1,
+        "x": 773,
+        "y": 222
+      },
+      "finger": "thumb",
+      "labels": {
+        "base": ""
+      }
+    },
+    {
+      "scancode": "KC_RALT",
+      "position": {
+        "col": 2,
+        "row": 5,
+        "width": 1.5,
+        "height": 1,
+        "x": 72,
+        "y": 277
+      },
+      "finger": "other",
+      "labels": {
+        "base": "Alt"
+      }
+    },
+    {
+      "scancode": "KC_RGUI",
+      "position": {
+        "col": 4,
+        "row": 5,
+        "width": 1.5,
+        "height": 1,
+        "x": 149,
+        "y": 277
+      },
+      "finger": "other",
+      "labels": {
+        "base": "Gui"
+      }
+    },
+    {
+      "scancode": "KC_RCTRL",
+      "position": {
+        "col": 6,
+        "row": 5,
+        "width": 1.5,
+        "height": 1,
+        "x": 226,
+        "y": 277
+      },
+      "finger": "other",
+      "labels": {
+        "base": "Ctrl"
+      }
+    }
+  ],
+  "fingerMap": {
+    "KC_Q": "pinky",
+    "KC_W": "ring",
+    "KC_E": "middle",
+    "KC_R": "index",
+    "KC_T": "index",
+    "KC_Y": "index",
+    "KC_U": "index",
+    "KC_I": "middle",
+    "KC_O": "ring",
+    "KC_P": "pinky",
+    "KC_A": "pinky",
+    "KC_S": "ring",
+    "KC_D": "middle",
+    "KC_F": "index",
+    "KC_G": "index",
+    "KC_H": "index",
+    "KC_J": "index",
+    "KC_K": "middle",
+    "KC_L": "ring",
+    "KC_SCOLON": "pinky",
+    "KC_Z": "pinky",
+    "KC_X": "ring",
+    "KC_C": "middle",
+    "KC_V": "index",
+    "KC_B": "index",
+    "KC_N": "index",
+    "KC_M": "middle",
+    "KC_COMMA": "ring",
+    "KC_DOT": "pinky",
+    "KC_SLASH": "pinky",
+    "KC_LBRC": "pinky",
+    "KC_RBRC": "pinky",
+    "KC_BSLS": "pinky",
+    "KC_NNO": "pinky",
+    "KC_LSHIFT": "pinky",
+    "KC_RSHIFT": "pinky",
+    "KC_LCTRL": "other",
+    "KC_RCTRL": "other",
+    "KC_LALT": "other",
+    "KC_RALT": "other",
+    "KC_LGUI": "other",
+    "KC_RGUI": "other",
+    "KC_ESC": "other",
+    "KC_BSPC": "other",
+    "KC_TAB": "other",
+    "KC_ENTER": "other",
+    "KC_1": "other",
+    "KC_2": "other",
+    "KC_3": "other",
+    "KC_4": "other",
+    "KC_5": "other",
+    "KC_6": "other",
+    "KC_7": "other",
+    "KC_8": "other",
+    "KC_9": "other",
+    "KC_0": "other",
+    "KC_TILDE": "other",
+    "KC_MINUS": "other",
+    "KC_EQUAL": "other",
+    "KC_HASH": "other",
+    "KC_GRAVE": "other",
+    "KC_QUOTE": "other",
+    "KC_DELETE": "other",
+    "KC_INSERT": "other",
+    "KC_HOME": "other",
+    "KC_END": "other",
+    "KC_PGUP": "other",
+    "KC_PGDN": "other",
+    "KC_UP": "other",
+    "KC_DOWN": "other",
+    "KC_LEFT": "other",
+    "KC_RIGHT": "other",
+    "KC_F1": "other",
+    "KC_F2": "other",
+    "KC_F3": "other",
+    "KC_F4": "other",
+    "KC_F5": "other",
+    "KC_F6": "other",
+    "KC_F7": "other",
+    "KC_F8": "other",
+    "KC_F9": "other",
+    "KC_F10": "other",
+    "KC_F11": "other",
+    "KC_F12": "other"
+  },
+  "layers": [
+    {
+      "name": "base",
+      "order": 0
+    },
+    {
+      "name": "numbers",
+      "order": 1
+    }
+  ]
+}
