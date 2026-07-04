@@ -2,9 +2,15 @@
   "buildCommand": "pnpm build",
   "outputDirectory": "dist",
   "devCommand": "pnpm dev",
-  "installCommand": "pnpm install --no-frozen-lockfile",
+  "installCommand": "corepack enable && pnpm install --no-frozen-lockfile",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
-  "framework": "vite"
+  "framework": "vite",
+  "build": {
+    "env": {
+      "COREPACK_DEFAULT_TO_LATEST": "0",
+      "COREPACK_NPM_REGISTRY": "https://registry.npmjs.org"
+    }
+  }
 }
