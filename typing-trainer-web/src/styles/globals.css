@@ -3,6 +3,6 @@
 /* Ghost mode for Mirror Mode — reduces visual emphasis when opacity < 0.2 */
 @layer utilities {
   .ghost-mode * {
-    @apply stroke-[0.5] !important;
+    stroke-width: 0.5px !important;
   }
 }

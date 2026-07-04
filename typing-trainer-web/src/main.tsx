@@ -1,27 +1,14 @@
+import './styles/globals.css';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { LayoutShell } from '@/components/LayoutShell';
 
-// Import route definitions
-import { Route as RootRoute } from './routes/__root';
-import { Route as IndexRoute } from './routes/index';
-import { Route as TrainingRoute } from './routes/training';
-import { Route as ProgressRoute } from './routes/progress';
-import { Route as SettingsRoute } from './routes/settings';
-import { Route as LayoutsRoute } from './routes/layouts';
-
-// Create route tree
-const routeTree = RootRoute.addChildren([
-  IndexRoute,
-  TrainingRoute,
-  ProgressRoute,
-  SettingsRoute,
-  LayoutsRoute,
-]);
+// Import auto-generated route tree
+import { routeTree } from './routeTree.gen';
 
 const router = createRouter({
-  routeTree,
+  routeTree: routeTree as any,
   defaultPendingComponent: () => (
     <div className="flex h-screen items-center justify-center">
       <p className="text-lg">Loading...</p>
