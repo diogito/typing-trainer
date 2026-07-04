@@ -1,10 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { SvgKeyboard, LayerIndicator, FingerLegend } from '@/components/keyboard/SvgKeyboard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useLayoutStore } from '@/stores/layoutStore';
+import { useUISlice } from '@/stores/uiStore';
 import { useEventCapture } from '@/core/capture/eventCapture';
 import type { KeystrokeEvent } from '@/types';
 
@@ -22,18 +25,37 @@ export function TrainingPage() {
   const activeLayer = useLayoutStore((s) => s.activeLayer);
   const activateLayer = useLayoutStore((s) => s.activateLayer);
 
+  // Mirror mode state from uiStore
+  const mirrorMode = useUISlice((s) => s.mirrorMode);
+  const toggleMirrorMode = useUISlice((s) => s.toggleMirrorMode);
+  const incrementMirrorProgress = useUISlice((s) => s.incrementMirrorProgress);
+  const resetMirrorMode = useUISlice((s) => s.resetMirrorMode);
+  const mirrorOpacity = useUISlice((s) => s.getMirrorOpacity());
+
   const [isInitialized, setIsInitialized] = useState(false);
+  const [activeLayoutId, setActiveLayoutId] = useState('');
 
   // Initialize session on mount
   const layoutId = useLayoutStore.getState().layoutId;
   if (!isInitialized && layout) {
     init(layoutId);
     setIsInitialized(true);
+    setActiveLayoutId(layoutId);
   }
 
+  // Reset mirror mode when layout changes
+  useEffect(() => {
+    if (layoutId !== activeLayoutId) {
+      resetMirrorMode();
+      setActiveLayoutId(layoutId);
+    }
+  }, [layoutId, activeLayoutId, resetMirrorMode]);
+
+  // Reset mirror mode when starting a new session
   const handleStart = useCallback(() => {
+    resetMirrorMode();
     start();
-  }, [start]);
+  }, [start, resetMirrorMode]);
 
   const handleStop = useCallback(() => {
     stop();
@@ -49,7 +71,11 @@ export function TrainingPage() {
 
   const handleKeystroke = useCallback((event: KeystrokeEvent) => {
     recordKeystroke(event);
-  }, [recordKeystroke]);
+    // Increment mirror progress on correct keystrokes (no error)
+    if (!event.error && mirrorMode.enabled) {
+      incrementMirrorProgress();
+    }
+  }, [recordKeystroke, mirrorMode.enabled, incrementMirrorProgress]);
 
   // Get finger map from layout
   const fingerMap = layout?.fingerMap ?? {};
@@ -102,16 +128,41 @@ export function TrainingPage() {
         )}
       </div>
 
-      {/* Layer indicator */}
-      <div className="flex justify-center">
-        {layout && (
-          <LayerIndicator
-            activeLayer={activeLayer}
-            layerNames={Object.keys(layout.layers)}
-            onLayerChange={activateLayer}
+      {/* Toolbar with Mirror Mode toggle */}
+      <div className="flex items-center justify-between px-4">
+        <div className="flex justify-center">
+          {layout && (
+            <LayerIndicator
+              activeLayer={activeLayer}
+              layerNames={Object.keys(layout.layers)}
+              onLayerChange={activateLayer}
+            />
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Mirror Mode</span>
+          <Switch
+            checked={mirrorMode.enabled}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                resetMirrorMode();
+              }
+              toggleMirrorMode();
+            }}
           />
-        )}
+        </div>
       </div>
+
+      {/* Mirror Mode progress bar */}
+      {mirrorMode.enabled && (
+        <div className="max-w-4xl mx-auto w-full px-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs text-muted-foreground">Mirror Progress</span>
+            <span className="text-xs font-mono">{mirrorMode.progress}%</span>
+          </div>
+          <Progress value={mirrorMode.progress} />
+        </div>
+      )}
 
       {/* SVG Keyboard — the centerpiece */}
       <Card className="w-full max-w-4xl mx-auto">
@@ -122,7 +173,7 @@ export function TrainingPage() {
           </div>
         </CardHeader>
         <CardContent className="pb-4">
-          <SvgKeyboard className="w-full" />
+          <SvgKeyboard className="w-full" opacity={mirrorMode.enabled ? mirrorOpacity : undefined} />
         </CardContent>
       </Card>
 

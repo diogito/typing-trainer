@@ -96,13 +96,15 @@ export function FingerLegend({ colors }: FingerLegendProps) {
 
 interface SvgKeyboardProps {
   className?: string;
+  opacity?: number;
 }
 
 /**
  * SVG Keyboard — renders all keys from the current layout as an interactive SVG.
  * Supports finger coloring, active key highlighting, layer overlays, and responsive scaling.
+ * Accepts an optional opacity for mirror mode.
  */
-export function SvgKeyboard({ className = '' }: SvgKeyboardProps) {
+export function SvgKeyboard({ className = '', opacity }: SvgKeyboardProps) {
   const {
     keys,
     keyboardWidth,
@@ -118,8 +120,15 @@ export function SvgKeyboard({ className = '' }: SvgKeyboardProps) {
     return Math.max(0.5, Math.min(1.2, containerWidth / keyboardWidth));
   }, [keyboardWidth]);
 
+  const isGhost = (opacity ?? 1) < 0.2;
+
   return (
-    <div className={`w-full overflow-x-auto ${className}`}>
+    <div
+      className={`w-full overflow-x-auto transition-opacity duration-300 ease-in-out ${
+        isGhost ? 'ghost-mode' : ''
+      } ${className}`}
+      style={{ opacity: opacity ?? 1 }}
+    >
       <svg
         viewBox={`0 0 ${keyboardWidth} ${keyboardHeight}`}
         className="w-full max-w-[1000px] mx-auto"
