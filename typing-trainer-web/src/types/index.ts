@@ -146,6 +146,21 @@ export interface QMKKeymapInput {
   layers: string[][];
 }
 
+// Posture calibration settings
+export interface PostureCalibration {
+  armSeparation: number;
+  wristHeight: number;
+  breakIntervalMinutes: number;
+  breakEnabled: boolean;
+}
+
+export const DEFAULT_POSTURE: PostureCalibration = {
+  armSeparation: 40,
+  wristHeight: 5,
+  breakIntervalMinutes: 30,
+  breakEnabled: false,
+};
+
 // Finger color constants
 export const FINGER_COLORS: Record<Finger, string> = {
   pinky: '#ef4444',

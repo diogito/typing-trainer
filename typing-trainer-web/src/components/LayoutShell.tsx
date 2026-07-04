@@ -1,5 +1,5 @@
 import { useLayoutStore } from '@/stores/layoutStore';
-import { Keyboard } from 'lucide-react';
+import { Keyboard, PersonStanding as PostureIcon } from 'lucide-react';
 
 interface LayoutShellProps {
   children: React.ReactNode;
@@ -49,6 +49,7 @@ export function LayoutShell({ children }: LayoutShellProps) {
             <SidebarLink href="/progress" icon={BarChart} label="Progress" />
             <SidebarLink href="/settings" icon={Settings} label="Settings" />
             <SidebarLink href="/layouts" icon={Monitor} label="Layouts" />
+            <SidebarLink href="/posture" icon={PostureIcon} label="Posture" />
           </nav>
         </aside>
 
@@ -64,6 +65,7 @@ export function LayoutShell({ children }: LayoutShellProps) {
         <NavButton href="/progress" icon={BarChart} label="Progress" />
         <NavButton href="/settings" icon={Settings} label="Settings" />
         <NavButton href="/layouts" icon={Monitor} label="Layouts" />
+        <NavButton href="/posture" icon={PostureIcon} label="Posture" />
       </nav>
     </div>
   );

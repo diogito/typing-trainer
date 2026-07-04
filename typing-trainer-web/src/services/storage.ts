@@ -1,13 +1,14 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { PersistedSession, UserPreferences, KeyboardLayout } from '@/types';
+import type { PersistedSession, UserPreferences, KeyboardLayout, PostureCalibration } from '@/types';
 
 const DB_NAME = 'typing-trainer';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 const STORES = {
   SESSIONS: 'sessions',
   PREFERENCES: 'preferences',
   LAYOUTS: 'layouts',
+  POSTURE: 'posture',
 } as const;
 
 const MAX_SESSIONS = 50;
@@ -29,6 +30,9 @@ async function openDatabase(): Promise<IDBPDatabase> {
       if (!db.objectStoreNames.contains(STORES.LAYOUTS)) {
         const store = db.createObjectStore(STORES.LAYOUTS, { keyPath: 'id' });
         store.createIndex('name', 'name');
+      }
+      if (DB_VERSION >= 2 && !db.objectStoreNames.contains(STORES.POSTURE)) {
+        db.createObjectStore(STORES.POSTURE, { keyPath: 'key' });
       }
     },
   });
@@ -166,9 +170,36 @@ export const storageService = {
     }
   },
 
+  async savePosture(posture: PostureCalibration): Promise<void> {
+    try {
+      const db = await openDatabase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (db as any).transaction(STORES.POSTURE, 'readwrite').objectStore(STORES.POSTURE).put({
+        key: 'posture',
+        ...posture,
+      });
+    } catch (err) {
+      console.error('[IndexedDB] Failed to save posture:', err);
+    }
+  },
+
+  async loadPosture(): Promise<PostureCalibration | null> {
+    try {
+      const db = await openDatabase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const posture = await (db as any)
+        .transaction(STORES.POSTURE, 'readonly')
+        .objectStore(STORES.POSTURE)
+        .get('posture') as PostureCalibration | undefined;
+      return posture ?? null;
+    } catch {
+      return null;
+    }
+  },
+
   async isAvailable(): Promise<boolean> {
     try {
-      await openDatabase();
+      const db = await openDatabase();
       return true;
     } catch {
       return false;
