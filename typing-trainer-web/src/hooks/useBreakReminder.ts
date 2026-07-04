@@ -10,11 +10,17 @@ export function useBreakReminder({ onReminder, isTyping = false }: UseBreakRemin
   const [elapsed, setElapsed] = useState(0);
   const [active, setActive] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const onReminderRef = useRef(onReminder);
   const posture = usePostureStore((s) => s.posture);
+
+  // Keep onReminderRef current to avoid stale closures
+  useEffect(() => {
+    onReminderRef.current = onReminder;
+  }, [onReminder]);
 
   const start = useCallback(() => {
     if (!posture.breakEnabled) return;
-    setActive(true);
+    // active = true only when reminder fires, not when timer starts
     setElapsed(0);
   }, [posture.breakEnabled]);
 
@@ -33,19 +39,21 @@ export function useBreakReminder({ onReminder, isTyping = false }: UseBreakRemin
   }, []);
 
   useEffect(() => {
-    if (posture.breakEnabled && isTyping && active) {
-      intervalRef.current = setInterval(() => {
-        setElapsed((prev) => {
-          const next = prev + 1;
-          const intervalMs = posture.breakIntervalMinutes * 60 * 1000;
-          if (next * 1000 >= intervalMs) {
-            onReminder?.();
-            return 0;
-          }
-          return next;
-        });
-      }, 1000);
-    }
+    if (!posture.breakEnabled || !isTyping) return;
+    // Timer runs while typing, regardless of active (overlay) state
+    intervalRef.current = setInterval(() => {
+      setElapsed((prev) => {
+        const next = prev + 1;
+        const intervalMs = posture.breakIntervalMinutes * 60 * 1000;
+        if (next * 1000 >= intervalMs) {
+          // Fire reminder — set active to show overlay
+          setActive(true);
+          onReminderRef.current?.();
+          return 0;
+        }
+        return next;
+      });
+    }, 1000);
 
     return () => {
       if (intervalRef.current) {
@@ -53,7 +61,7 @@ export function useBreakReminder({ onReminder, isTyping = false }: UseBreakRemin
         intervalRef.current = null;
       }
     };
-  }, [posture.breakEnabled, posture.breakIntervalMinutes, isTyping, active, onReminder]);
+  }, [posture.breakEnabled, posture.breakIntervalMinutes, isTyping]);
 
   const remaining = posture.breakEnabled
     ? Math.max(0, posture.breakIntervalMinutes * 60 - elapsed)
