@@ -1,4 +1,5 @@
-import { AlertTriangle, Pause, Play, X } from 'lucide-react';
+import { AlertTriangle, Pause, X } from 'lucide-react';
+import { usePostureStore } from '@/stores/postureStore';
 
 interface BreakReminderOverlayProps {
   active: boolean;
@@ -15,12 +16,17 @@ export function BreakReminderOverlay({
   formattedRemaining,
   onDismiss,
   onPause,
-  onResume,
+  onResume: _onResume,
 }: BreakReminderOverlayProps) {
   if (!active) return null;
 
+  const breakIntervalMinutes = usePostureStore((s) => s.posture.breakIntervalMinutes);
   const minutes = Math.floor(remaining / 60);
   const seconds = Math.round(remaining % 60);
+
+  const progressPercent = breakIntervalMinutes > 0
+    ? Math.min(100, ((breakIntervalMinutes * 60 - remaining) / (breakIntervalMinutes * 60)) * 100)
+    : 0;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -50,7 +56,7 @@ export function BreakReminderOverlay({
         <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
           <div
             className="h-full rounded-full bg-amber-400 transition-all duration-1000 ease-linear"
-            style={{ width: `${((remaining / 60) / (1)) * 100}%` }}
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
 

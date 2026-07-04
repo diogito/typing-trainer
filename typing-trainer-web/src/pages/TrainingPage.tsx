@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
+import { BreakReminderOverlay } from '@/components/BreakReminderOverlay';
+import { useBreakReminder } from '@/hooks/useBreakReminder';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useUISlice } from '@/stores/uiStore';
@@ -38,6 +40,14 @@ export function TrainingPage() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [activeLayoutId, setActiveLayoutId] = useState('');
 
+  // Break reminder integration
+  const breakReminder = useBreakReminder({
+    onReminder: () => {
+      // Overlay auto-shown via breakReminder.active === true
+    },
+    isTyping: session.state === 'running',
+  });
+
   // Initialize session on mount
   const layoutId = useLayoutStore.getState().layoutId;
   if (!isInitialized && layout) {
@@ -57,20 +67,23 @@ export function TrainingPage() {
   // Reset mirror mode when starting a new session
   const handleStart = useCallback(() => {
     resetMirrorMode();
+    breakReminder.start();
     start();
-  }, [start, resetMirrorMode]);
+  }, [start, resetMirrorMode, breakReminder]);
 
   const handleStop = useCallback(() => {
     stop();
-  }, [stop]);
+    breakReminder.reset();
+  }, [stop, breakReminder]);
 
   const handlePause = useCallback(() => {
     if (session.state === 'running') {
       pause();
+      breakReminder.pause();
     } else {
       resume();
     }
-  }, [session.state, pause, resume]);
+  }, [session.state, pause, resume, breakReminder]);
 
   const handleKeystroke = useCallback((event: KeystrokeEvent) => {
     recordKeystroke(event);
@@ -185,6 +198,16 @@ export function TrainingPage() {
           <SvgKeyboard className="w-full" opacity={mirrorMode.enabled ? mirrorOpacity : undefined} />
         </CardContent>
       </Card>
+
+      {/* Break reminder overlay */}
+      <BreakReminderOverlay
+        active={breakReminder.active}
+        remaining={breakReminder.remaining}
+        formattedRemaining={breakReminder.formattedRemaining}
+        onDismiss={breakReminder.dismiss}
+        onPause={breakReminder.pause}
+        onResume={() => {}}
+      />
 
       {/* Finger legend */}
       <div className="flex justify-center pb-4">
