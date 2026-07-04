@@ -1,5 +1,12 @@
-import { vi } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
 import '@testing-library/jest-dom';
+
+// Expose vi globally for TypeScript
+declare global {
+  // eslint-disable-next-line no-var
+  var vi: typeof import('vitest').vi;
+}
+globalThis.vi = vi;
 
 // Global test setup
 // Mock window.matchMedia for happy-dom

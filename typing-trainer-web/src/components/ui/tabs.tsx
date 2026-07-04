@@ -4,10 +4,10 @@ interface TabsProps {
   value: string;
   children: React.ReactNode;
   className?: string;
+  onValueChange?: (value: string) => void;
 }
 
-export function Tabs({ value, children, className }: TabsProps) {
-  void value;
+export function Tabs({ value, children, className, onValueChange }: TabsProps) {
   return (
     <div className={cn('w-full', className)}>
       {children}
@@ -35,7 +35,6 @@ interface TabsTriggerProps {
 }
 
 export function TabsTrigger({ value, children, className }: TabsTriggerProps) {
-  void value;
   return (
     <button
       className={cn(
