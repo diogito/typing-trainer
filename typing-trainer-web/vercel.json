@@ -1,8 +1,7 @@
 {
-  "buildCommand": "pnpm run build",
-  "outputDirectory": "dist",
-  "devCommand": "pnpm run dev",
-  "installCommand": "pnpm install",
+  "builds": [
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
