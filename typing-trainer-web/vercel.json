@@ -1,9 +1,8 @@
 {
-  "buildCommand": "pnpm run build",
+  "buildCommand": "node vercel-build.js",
   "outputDirectory": "dist",
-  "installCommand": "npx pnpm@9.15.9 install",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
-  "framework": "vite"
+  "framework": null
 }
