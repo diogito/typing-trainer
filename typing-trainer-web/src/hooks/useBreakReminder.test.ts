@@ -38,12 +38,21 @@ describe('useBreakReminder', () => {
       posture: { ...DEFAULT_POSTURE, breakEnabled: true, breakIntervalMinutes: 1 },
     });
 
+    vi.useFakeTimers();
     const { result } = renderHook(() =>
       useBreakReminder({ isTyping: true }),
     );
 
     act(() => result.current.start());
+    // start() resets elapsed but does NOT set active (active only when timer fires)
+    expect(result.current.active).toBe(false);
+    expect(result.current.elapsed).toBe(0);
+
+    // After 60 seconds, timer fires and sets active to true
+    act(() => vi.advanceTimersByTime(60_000));
     expect(result.current.active).toBe(true);
+
+    vi.useRealTimers();
   });
 
   it('does not start when break is disabled', () => {
@@ -76,19 +85,36 @@ describe('useBreakReminder', () => {
 
   it('pauses and resumes', () => {
     usePostureStore.setState({
-      posture: { ...DEFAULT_POSTURE, breakEnabled: true },
+      posture: { ...DEFAULT_POSTURE, breakEnabled: true, breakIntervalMinutes: 1 },
     });
 
+    vi.useFakeTimers();
     const { result } = renderHook(() =>
       useBreakReminder({ isTyping: true }),
     );
 
     act(() => result.current.start());
+    expect(result.current.active).toBe(false);
+    expect(result.current.elapsed).toBe(0);
+
+    // Advance time — timer fires, active becomes true
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(result.current.active).toBe(true);
+
+    // Pause (dismiss the active overlay)
     act(() => result.current.pause());
     expect(result.current.active).toBe(false);
 
+    // Start a new interval — resets but does not immediately activate
     act(() => result.current.start());
+    expect(result.current.active).toBe(false);
+    expect(result.current.elapsed).toBe(0);
+
+    // Advance time again — should fire again
+    act(() => vi.advanceTimersByTime(60_000));
     expect(result.current.active).toBe(true);
+
+    vi.useRealTimers();
   });
 
   it('calls onReminder when interval elapses', () => {

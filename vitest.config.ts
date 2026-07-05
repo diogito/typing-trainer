@@ -7,18 +7,24 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default {
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './typing-trainer-web/src'),
     },
   },
   test: {
     globals: true,
-    environment: 'happy-dom',
-    setupFiles: ['./src/test/setup.ts'],
+    environment: 'jsdom',
+    setupFiles: ['./typing-trainer-web/src/test/setup.ts'],
+    include: ['typing-trainer-web/**/*.test.{ts,tsx}'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       '**/.git/**',
       '**/archive/**',
     ],
+    jsdom: {
+      container: {
+        window: {},
+      },
+    },
   },
 } as Config;
