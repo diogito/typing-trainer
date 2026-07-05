@@ -120,7 +120,7 @@ Chain strategy: pending
 
 ## Phase 7: SVG Keyboard Rendering
 
-- [ ] task-16: Implement SVGKeyboard component — single SVG element with `<g>` per key, `<rect>` for normal keys, `<path>` for ISO Enter/spacebar, CSS classes for finger color (pinky=#ef4444, ring=#f97316, middle=#eab308, index=#22c55e, thumb=#3b82f6, other=#6b7280), active key highlight (white stroke/darker bg), layer label overlay, responsive sizing (fits container, min 28px touch target on mobile), key shape fidelity (spacebar ~6x, Shift ≥1.5x, ISO Enter taller), React.memo on key components
+- [x] task-16: Implement SVGKeyboard component — single SVG element with `<g>` per key, `<rect>` for normal keys, `<path>` for ISO Enter/spacebar, CSS classes for finger color (pinky=#ef4444, ring=#f97316, middle=#eab308, index=#22c55e, thumb=#3b82f6, other=#6b7280), active key highlight (white stroke/darker bg), layer label overlay, responsive sizing (fits container, min 28px touch target on mobile), key shape fidelity (spacebar ~6x, Shift ≥1.5x, ISO Enter taller), React.memo on key components
   - Files: src/features/keyboard/components/SVGKeyboard.tsx, src/features/keyboard/components/KeyboardKey.tsx
   - Dependencies: task-12, task-13
   - Testing: renders 80 keys for QWERTY, ISO Enter has custom path, KC_Q has finger-pinky class, active key highlighted, numbers layer shows "1 2 3 4 5", responsive at 360px and 800px
@@ -134,7 +134,7 @@ Chain strategy: pending
   - Testing: store session → load by ID, persist preferences → load on init, save custom layout → load, delete layout → removed, 51st session evicts oldest
   - Acceptance: All stores work, Date fields survive serialization round-trip
 
-- [ ] task-18: Implement Zustand persist middleware with IndexedDB adapter — wrap stores with persist + indexeddb adapter, auto-save on stop (sessions), error handling (IndexedDB failure → in-memory fallback, toast for session saves, private browsing banner)
+- [x] task-18: Implement Zustand persist middleware with IndexedDB adapter — wrap stores with persist + indexeddb adapter, auto-save on stop (sessions), error handling (IndexedDB failure → in-memory fallback, toast for session saves, private browsing banner)
   - Files: src/services/persistence.ts, src/stores/layoutStore.ts (update), src/stores/sessionStore.ts (update), src/stores/uiStore.ts (update)
   - Dependencies: task-17, task-12, task-13, task-14, task-15
   - Testing: save session → IndexedDB, app reload restores session, IndexedDB failure → in-memory + toast, private browsing → non-crashing degraded mode
@@ -142,37 +142,37 @@ Chain strategy: pending
 
 ## Phase 9: App Shell & Pages
 
-- [ ] task-19: Implement root router configuration — TanStack Router with root layout, 4 routes: `/` (redirect to `/training`), `/layout`, `/training`, `/progress`, `/settings`; configure RouterProvider in App
+- [x] task-19: Implement root router configuration — TanStack Router with root layout, 4 routes: `/` (redirect to `/training`), `/layout`, `/training`, `/progress`, `/settings`; configure RouterProvider in App
   - Files: src/app/router.tsx, src/app/routes.ts
   - Dependencies: task-01
   - Testing: navigate to / → redirect to /training, /layout → LayoutPage, /training → TrainingPage, /progress → ProgressPage, /settings → SettingsPage
   - Acceptance: All routes work, redirect functions
 
-- [ ] task-20: Implement app shell layout — fixed header with app title + 4 nav tabs (active highlight), collapsible sidebar (desktop), responsive breakpoints (≥1024 sidebar visible, 768-1023 collapsible, <768 hidden + bottom nav), Tab order (header→sidebar→main→footer), Escape closes dialogs
+- [x] task-20: Implement app shell layout — fixed header with app title + 4 nav tabs (active highlight), collapsible sidebar (desktop), responsive breakpoints (≥1024 sidebar visible, 768-1023 collapsible, <768 hidden + bottom nav), Tab order (header→sidebar→main→footer), Escape closes dialogs
   - Files: src/app/components/AppShell.tsx, src/app/components/Header.tsx, src/app/components/Sidebar.tsx
   - Dependencies: task-19
   - Testing: header renders with 4 tabs, active tab highlighted, responsive at 3 breakpoints, tab order correct
   - Acceptance: Shell renders consistently across breakpoints, nav integration with Zustand
 
-- [ ] task-21: Implement Layout page — layout selector (5 options), active indicator, import button (QMK keymap.json), custom layout CRUD buttons, integrates with layoutStore
+- [x] task-21: Implement Layout page — layout selector (5 options), active indicator, import button (QMK keymap.json), custom layout CRUD buttons, integrates with layoutStore
   - Files: src/app/pages/LayoutPage.tsx
   - Dependencies: task-12, task-20
   - Testing: selector shows 5 layouts, active layout highlighted, import opens file picker, custom layout creation works
   - Acceptance: Layout page fully functional, integrates with layout store and storage
 
-- [ ] task-22: Implement Training page — SVGKeyboard component, Start/Pause/Stop buttons, live WPM/accuracy stats display, integrates with sessionStore and eventCapture, Escape pauses session
+- [x] task-22: Implement Training page — SVGKeyboard component, Start/Pause/Stop buttons, live WPM/accuracy stats display, integrates with sessionStore and eventCapture, Escape pauses session
   - Files: src/app/pages/TrainingPage.tsx
   - Dependencies: task-11, task-14, task-16, task-20
   - Testing: keyboard renders, start→running, pause→paused, stop→idle, WPM/accuracy update live, Escape pauses
   - Acceptance: Training page is fully interactive with real-time feedback
 
-- [ ] task-23: Implement Progress page — session list table (date, layout, WPM, accuracy, duration), aggregate metrics (avgWpm, avgAccuracy, bestWpm, totalSessions), date filter, loads from IndexedDB
+- [x] task-23: Implement Progress page — session list table (date, layout, WPM, accuracy, duration), aggregate metrics (avgWpm, avgAccuracy, bestWpm, totalSessions), date filter, loads from IndexedDB
   - Files: src/app/pages/ProgressPage.tsx
   - Dependencies: task-17, task-19
   - Testing: empty state when no sessions, populated table with sessions, aggregate metrics correct, date filter works
   - Acceptance: Progress page shows complete session history with aggregation
 
-- [ ] task-24: Implement Settings page — layout selector, color scheme picker, font size control, import keymap.json, load/save preferences to IndexedDB via uiStore
+- [x] task-24: Implement Settings page — layout selector, color scheme picker, font size control, import keymap.json, load/save preferences to IndexedDB via uiStore
   - Files: src/app/pages/SettingsPage.tsx
   - Dependencies: task-15, task-17, task-20
   - Testing: settings form renders, changes persist to IndexedDB, reload restores settings, font size change applies
@@ -180,7 +180,7 @@ Chain strategy: pending
 
 ## Phase 10: Integration Testing & Verification
 
-- [ ] task-25: Write integration test — complete flow: select layout → start session → simulate keypresses with timing → verify metrics computation → stop session → verify IndexedDB persistence → reload → verify restoration
+- [x] task-25: Write integration test — complete flow: select layout → start session → simulate keypresses with timing → verify metrics computation → stop session → verify IndexedDB persistence → reload → verify restoration
   - Files: src/**/*.test.tsx or src/**/*.test.ts (integration test suite)
   - Dependencies: all tasks
   - Testing: full lifecycle test, unit tests for all core functions, coverage target >80% on core/

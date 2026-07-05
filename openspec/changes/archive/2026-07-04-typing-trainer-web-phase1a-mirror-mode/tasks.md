@@ -27,13 +27,13 @@ Chain strategy: pending
 
 ## Phase 1: Foundation — Progress Component + uiStore
 
-- [ ] task-26: Create `src/components/ui/progress.tsx` — shadcn Progress component with `indicator` slot, `transition-all` on indicator bar, accepts `value` number prop (0-100), uses `cn()` from utils. Export as named `Progress`. Test renders at 0%, 50%, 100%. (~40 lines)
+- [x] task-26: Create `src/components/ui/progress.tsx` — shadcn Progress component with `indicator` slot, `transition-all` on indicator bar, accepts `value` number prop (0-100), uses `cn()` from utils. Export as named `Progress`. Test renders at 0%, 50%, 100%. (~40 lines)
   - Files: `src/components/ui/progress.tsx` (new)
   - Dependencies: none
   - Testing: renders bar with correct width for value prop, accessible `role="progressbar"`
   - Acceptance: `<Progress value={50}>` shows 50% filled bar, zero TypeScript errors
 
-- [ ] task-27: Add mirrorMode state to `src/stores/uiStore.ts` — add `mirrorMode: { enabled: boolean; progress: number }` to UISlice with defaults `{ enabled: false, progress: 0 }`, methods: `toggleMirrorMode()` (toggles enabled), `incrementMirrorProgress()` (adds 2%, caps at 100), `resetMirrorMode()` (enabled=false, progress=0), `setMirrorOpacity()` (not needed — opacity computed inline). Add `MIN_OPACITY = 0.08` constant. (~30 lines)
+- [x] task-27: Add mirrorMode state to `src/stores/uiStore.ts` — add `mirrorMode: { enabled: boolean; progress: number }` to UISlice with defaults `{ enabled: false, progress: 0 }`, methods: `toggleMirrorMode()` (toggles enabled), `incrementMirrorProgress()` (adds 2%, caps at 100), `resetMirrorMode()` (enabled=false, progress=0), `setMirrorOpacity()` (not needed — opacity computed inline). Add `MIN_OPACITY = 0.08` constant. (~30 lines)
   - Files: `src/stores/uiStore.ts` (modify)
   - Dependencies: none
   - Testing: toggle flips enabled, incrementProgress goes 0→2→4...→100, reset restores defaults, progress caps at 100
@@ -41,7 +41,7 @@ Chain strategy: pending
 
 ## Phase 2: Keyboard Fade — Opacity Prop
 
-- [ ] task-28: Add `opacity` prop to `src/components/keyboard/SvgKeyboard.tsx` — accept `opacity?: number` in `SvgKeyboardProps`, apply `style={{ opacity }}` to the root `<div>` wrapper (not the SVG itself, so key interactions still work), add `transition-opacity duration-300` className, apply `ghost-mode` class when opacity < 0.2. Keep existing className prop. (~20 lines)
+- [x] task-28: Add `opacity` prop to `src/components/keyboard/SvgKeyboard.tsx` — accept `opacity?: number` in `SvgKeyboardProps`, apply `style={{ opacity }}` to the root `<div>` wrapper (not the SVG itself, so key interactions still work), add `transition-opacity duration-300` className, apply `ghost-mode` class when opacity < 0.2. Keep existing className prop. (~20 lines)
   - Files: `src/components/keyboard/SvgKeyboard.tsx` (modify)
   - Dependencies: task-26, task-27
   - Testing: opacity prop passed as style, ghost-mode class applied when opacity < 0.2, no class when >= 0.2
@@ -49,7 +49,7 @@ Chain strategy: pending
 
 ## Phase 3: TrainingPage Integration
 
-- [ ] task-29: Update `src/pages/TrainingPage.tsx` — add Mirror Mode toggle (Switch from ui/switch.tsx) in stats bar or controls area, add Progress bar below toggle (visible only when enabled), connect keyboard opacity via `opacity = max(0.08, 1.0 - progress/100 * (1.0 - 0.08))`, wire `incrementMirrorProgress` on correct keystroke (when `event.error` is undefined), reset mirror mode on `init()` (new session) and `setLayout()` (layout change). Use Zustand selector to subscribe to `mirrorMode` state. Add layoutId change detection via effect comparing `useLayoutStore.getState().layoutId`. (~80 lines)
+- [x] task-29: Update `src/pages/TrainingPage.tsx` — add Mirror Mode toggle (Switch from ui/switch.tsx) in stats bar or controls area, add Progress bar below toggle (visible only when enabled), connect keyboard opacity via `opacity = max(0.08, 1.0 - progress/100 * (1.0 - 0.08))`, wire `incrementMirrorProgress` on correct keystroke (when `event.error` is undefined), reset mirror mode on `init()` (new session) and `setLayout()` (layout change). Use Zustand selector to subscribe to `mirrorMode` state. Add layoutId change detection via effect comparing `useLayoutStore.getState().layoutId`. (~80 lines)
   - Files: `src/pages/TrainingPage.tsx` (modify)
   - Dependencies: task-27, task-28
   - Testing: toggle enables/disables mode, progress bar visible only when enabled, opacity calculated correctly at 0/50/100% progress, resets on session init and layout change
@@ -57,7 +57,7 @@ Chain strategy: pending
 
 ## Phase 4: Verification
 
-- [ ] task-30: Write integration test — test mirror mode toggle on/off, progress increments on correct keystrokes (`error === undefined`), progress stays unchanged on incorrect keystrokes (`error === 'wrong-key'`), reset on layout change, reset on new session, ghost-mode class applied at opacity < 0.2, ghost-mode removed when mode disabled. Use vitest + @testing-library/react. (~80-100 lines)
+- [x] task-30: Write integration test — test mirror mode toggle on/off, progress increments on correct keystrokes (`error === undefined`), progress stays unchanged on incorrect keystrokes (`error === 'wrong-key'`), reset on layout change, reset on new session, ghost-mode class applied at opacity < 0.2, ghost-mode removed when mode disabled. Use vitest + @testing-library/react. (~80-100 lines)
   - Files: `src/pages/TrainingPage.test.tsx` (new)
   - Dependencies: task-29
   - Testing: all scenarios from mirror-mode-ui, mirror-mode-visual, mirror-mode-logic specs
