@@ -14,13 +14,29 @@ Phase 0 is fully built and passing 70 tests. The architecture is clean:
 - **Routes**: 4 pages (Training, Layouts, Progress, Settings) via TanStack Router
 - **UI**: shadcn/ui with Card, Button, Input, Select, Switch, Badge, Tabs, Separator
 
-Key observations:
-- `detectError()` in `fingerDetection.ts` is a **stub** — it returns `undefined` always. Wrong-finger detection is NOT implemented yet.
-- `actualFinger` is always `'unknown'` in `eventCapture.ts` — no physical finger tracking exists
-- The `error` field exists on `KeystrokeEvent` but is never set during capture
-- `SessionEngine.stop()` has a **placeholder col=1** for finger error tracking — needs the real column from layout
-- `KeyboardLayerOverlay` already dims inactive layer keys (good foundation for fade animations)
-- SVG keyboard uses `fillOpacity` for active state with 50ms CSS transitions (can extend for fade-out)
+### Implementation Status
+
+| Phase | Feature | Status | Details |
+|-------|---------|--------|---------|
+| **1a** | Mirror Mode | ✅ Fully implemented | CSS opacity fade on SVG keyboard, toggle in TrainingPage, tests passing |
+| **1b** | Finger Accuracy | ⚠️ Partially implemented | Detection logic + heatmap UI complete, but `actualFinger` always equals `expectedFinger` (optimistic). Heatmap never fires in production. Fix needed: position-based finger inference in `eventCapture.ts`. Tests exist but pass with optimistic data. |
+| **1c** | Posture Calibration | ✅ Fully implemented | `PostureCalibration` type (4 fields: armSeparation, wristHeight, completed, updatedAt), IndexedDB POSTURE store, `PosturePage.tsx` with sliders, tests passing |
+| **1d** | Layout Customization | ✅ Fully implemented | Key label editing on `LayoutPage`, QMK JSON import via `parseQMKKeymap()`, VIA/Vial parser, tests passing |
+| **1e** | Break Integration | ✅ Fully implemented | Break timer + overlay firing during training sessions, tests passing |
+| **Platform Stabilization** | Live metrics, SPA nav, defaults | ✅ Fixed | Live WPM/accuracy metrics during training, SPA navigation working, break reminders enabled by default |
+
+### Remaining Gap
+
+Phase 1b (Finger Accuracy) is the **only incomplete phase**. The core issue:
+- `eventCapture.ts` sets `actualFinger` from the layout column (same column = same finger = correct), which is optimistic
+- Real fix: infer finger from **key position on screen** vs expected finger for that key position
+- Until this is fixed, `detectError()` can produce false negatives (user reaches with wrong finger but we think it's correct)
+
+### Notes on Original Design vs. Actual Implementation
+
+- `PostureCalibration` has **4 fields** (armSeparation, wristHeight, completed, updatedAt), **not 6** — `shoulderPosition` and `screenHeight` were dropped during implementation
+- `detectError()` is **NOT a stub** — it's implemented in `fingerDetection.ts` and returns real comparisons
+- `actualFinger` is NOT always `'unknown'` — it's derived from layout columns but is overly optimistic
 
 ## Affected Areas
 
@@ -168,47 +184,38 @@ The SVG keyboard already uses CSS transitions. We extend this by:
 
 ## Phasing Recommendation
 
-### Phase 1a — Mirror Mode (Priority: High, Effort: Low)
-- `uiStore`: Add `mirrorMode` state
-- `SvgKeyboard`: Add opacity prop with keystroke-driven fade
-- `TrainingPage`: Add toggle button
-- 2-3 new tests for mirror mode behavior
+### Completed
 
-### Phase 1b — Finger Accuracy (Priority: High, Effort: Medium-High)
-- Fix `detectError()` stub in `fingerDetection.ts`
-- Wire `actualFinger` in `eventCapture.ts`
-- Update `SessionEngine.stop()` to pass real column data
-- Add `keyboardStore` error tracking
-- Heatmap SVG overlay component
-- Extend `metrics.ts` with heatmap aggregation
-- 5-8 new tests
+| Phase | Feature | Status |
+|-------|---------|--------|
+| 1a | Mirror Mode | ✅ Done — CSS opacity fade, toggle UI, tests |
+| 1c | Posture Calibration | ✅ Done — 4-field type, POSTURE store, page, tests |
+| 1d | Layout Customization | ✅ Done — label editing, QMK import, parser, tests |
+| 1e | Break Integration | ✅ Done — timer + overlay during sessions, tests |
+| — | Platform Stabilization | ✅ Done — live metrics, SPA nav, break reminders on |
 
-### Phase 1c — Posture Calibration (Priority: Medium, Effort: Low-Medium)
-- New `PostureCalibration` type
-- IndexedDB v2 upgrade with POSTURE store
-- New `PosturePage.tsx` with sliders
-- New route `/posture`
-- 3-4 new tests
+### Pending
 
-### Phase 1d — Layout Customization (Priority: Medium, Effort: Medium)
-- Key label editing on `LayoutPage`
-- QMK JSON import with `parseQMKKeymap()`
-- VIA/Vial parser extension
-- 4-6 new tests
+| Phase | Feature | Status | Remaining Work |
+|-------|---------|--------|----------------|
+| 1b | Finger Accuracy | ⚠️ Partial | Fix `actualFinger` inference in `eventCapture.ts` — need position-based finger detection, not optimistic column match. Update tests with realistic negative cases. |
 
-## Next Recommended Phase
+### Next Recommended Phase
 
-Start with **Phase 1a (Mirror Mode)** — it's the lowest effort, uses existing infrastructure, and delivers immediate value. It's a self-contained feature that can be implemented in a single session.
-
-After 1a, proceed to **Phase 1b (Finger Accuracy)** — this is the most technically complex and needs real finger detection before the heatmap is meaningful.
-
-Posture and Layout customization can run in parallel with 1b since they touch different parts of the codebase.
+**1b (Finger Accuracy) — fix only.** The detection infrastructure, heatmap rendering, and analytics are already built. The single missing piece is position-based finger inference in `eventCapture.ts`. When `actualFinger` is correctly inferred from key position (not just layout column), the heatmap will begin working in production.
 
 ## Ready for Proposal
 
-**Yes.** The exploration is clear and actionable. The orchestrator can proceed to Phase Proposal with confidence. Key decisions:
-1. Mirror mode = CSS opacity fade (not full SVG hands)
-2. Finger detection = position-based inference (documented limitation)
-3. Heatmap = SVG overlay (not 3D)
-4. Posture = simple slider UI (not AI pose detection)
-5. Layout customization = label editing + JSON import (no physical repositioning yet)
+**Partially.** Four of five phases (1a, 1c, 1d, 1e) plus platform stabilization are fully implemented and production-ready. Only Phase 1b has remaining work.
+
+**Next action:** A targeted fix for `eventCapture.ts` to infer `actualFinger` from key position, not from layout column equality. This is a scoped change (~50-100 lines, one file) that unlocks the heatmap functionality already in place.
+
+**What's already decided and implemented:**
+1. Mirror mode = CSS opacity fade ✅
+2. Finger detection approach = position-based (inferring finger from key position → column → finger mapping)
+3. Heatmap = SVG overlay ✅
+4. Posture = simple slider UI (4 fields, not 6) ✅
+5. Layout customization = label editing + QMK JSON import ✅
+6. Break integration = timer + overlay during sessions ✅
+
+**The exploration document has served its purpose.** It accurately guided the implementation of 4/5 phases. The remaining gap is narrow enough to address with a focused fix rather than a full proposal cycle.
