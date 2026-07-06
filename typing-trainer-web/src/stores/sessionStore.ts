@@ -76,7 +76,8 @@ export const useSessionStore = create<SessionSlice>((set, get) => ({
     const { engine } = get();
     if (!engine) return;
     const state = engine.recordKeystroke(event);
-    set({ state });
+    const liveMetrics = engine.computeLiveMetrics(Date.now()) as SessionMetrics;
+    set({ state, metrics: liveMetrics });
   },
 
   loadFromStorage: (saved: SessionState) => {

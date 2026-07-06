@@ -112,8 +112,24 @@ export function TrainingPage() {
   const wpm = metrics?.wpm ?? 0;
   const accuracy = metrics?.accuracy ?? 100;
   const precision = metrics?.precision ?? 0;
-  const ks = metrics?.totalKeystrokes ?? 0;
-  const elapsed = metrics ? Math.round(metrics.duration) : 0;
+  const ks = session.keystrokes.length;
+
+  // Live elapsed time during running session
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (session.state !== 'running' || !session.startTime) {
+      // When idle, show stored metrics duration
+      setElapsed(metrics ? Math.round(metrics.duration) : 0);
+      return;
+    }
+    const startTime = session.startTime;
+    const tick = () => {
+      setElapsed(Math.floor((Date.now() - startTime) / 1000));
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [session.state, session.startTime, metrics]);
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">

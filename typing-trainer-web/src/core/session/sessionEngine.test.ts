@@ -140,6 +140,123 @@ describe('SessionEngine lifecycle', () => {
     engine.start();
     expect(engine.getMetrics()).toBeNull();
   });
+
+  it('computes live metrics during running session', () => {
+    engine.start();
+
+    const start1 = Date.now();
+    const originalDateNow = global.Date.now;
+    global.Date.now = () => start1 + 60000; // 60 seconds later
+
+    // Record 120 keystrokes (120 chars) in 60 seconds
+    for (let i = 0; i < 120; i++) {
+      engine.recordKeystroke({
+        code: 'KeyA',
+        key: 'a',
+        scancode: 'KC_A',
+        timestamp: i * 500,
+        finger: 'pinky',
+        actualFinger: 'pinky',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+      } as KeystrokeEvent);
+    }
+
+    const live = engine.computeLiveMetrics(start1 + 60000);
+    expect(live.totalKeystrokes).toBe(120);
+    // 120 chars / 5 = 24 words, 60s = 1 min → 24 WPM
+    expect(live.wpm).toBe(24);
+    expect(live.accuracy).toBe(100);
+    expect(engine.getMetrics()).toBeNull(); // no state mutation
+
+    global.Date.now = originalDateNow;
+  });
+
+  it('computes accuracy with errors: 10 keystrokes, 2 errors = 80%', () => {
+    engine.start();
+
+    for (let i = 0; i < 8; i++) {
+      engine.recordKeystroke({
+        code: 'KeyA',
+        key: 'a',
+        scancode: 'KC_A',
+        timestamp: i * 100,
+        finger: 'pinky',
+        actualFinger: 'pinky',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+      } as KeystrokeEvent);
+    }
+    for (let i = 0; i < 2; i++) {
+      engine.recordKeystroke({
+        code: 'KeyX',
+        key: 'x',
+        scancode: 'KC_X',
+        timestamp: (8 + i) * 100,
+        finger: 'pinky',
+        actualFinger: 'pinky',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+        error: 'wrong-key',
+      } as KeystrokeEvent);
+    }
+
+    const live = engine.computeLiveMetrics(Date.now());
+    expect(live.totalKeystrokes).toBe(10);
+    expect(live.accuracy).toBe(80);
+  });
+
+  it('handles zero keystrokes', () => {
+    engine.start();
+    const live = engine.computeLiveMetrics(Date.now());
+    expect(live.totalKeystrokes).toBe(0);
+    expect(live.wpm).toBe(0);
+    expect(live.accuracy).toBe(100);
+  });
+
+  it('excludes pause duration from live metrics', () => {
+    const start1 = Date.now();
+    engine.start();
+
+    // Record 30 keystrokes in first 30s
+    for (let i = 0; i < 30; i++) {
+      engine.recordKeystroke({
+        code: 'KeyA',
+        key: 'a',
+        scancode: 'KC_A',
+        timestamp: i * 1000,
+        finger: 'pinky',
+        actualFinger: 'pinky',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+      } as KeystrokeEvent);
+    }
+
+    const originalDateNow = global.Date.now;
+    // Pause at 30s
+    global.Date.now = () => start1 + 30000;
+    engine.pause();
+
+    // Resume at 45s
+    global.Date.now = () => start1 + 45000;
+    engine.resume();
+
+    // Compute live at 60s (30s active in first run + 15s active = 45s total active)
+    global.Date.now = () => start1 + 60000;
+    const live = engine.computeLiveMetrics(start1 + 60000);
+
+    global.Date.now = originalDateNow;
+
+    // 30 keystrokes in 45 active seconds
+    expect(live.totalKeystrokes).toBe(30);
+    expect(live.duration).toBe(45);
+    // 30/5 = 6 words, 45/60 = 0.75 min → 8 WPM
+    expect(live.wpm).toBe(8);
+  });
 });
 
 describe('sessionEngine stop() column tracking', () => {

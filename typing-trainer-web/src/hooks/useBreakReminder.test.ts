@@ -30,7 +30,7 @@ describe('useBreakReminder', () => {
     const { result } = renderHook(() => useBreakReminder());
     expect(result.current.active).toBe(false);
     expect(result.current.elapsed).toBe(0);
-    expect(result.current.enabled).toBe(false);
+    expect(result.current.enabled).toBe(true);
   });
 
   it('starts timer when enabled and typing', () => {

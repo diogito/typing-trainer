@@ -158,7 +158,7 @@ export const DEFAULT_POSTURE: PostureCalibration = {
   armSeparation: 40,
   wristHeight: 5,
   breakIntervalMinutes: 30,
-  breakEnabled: false,
+  breakEnabled: true,
 };
 
 // Finger color constants

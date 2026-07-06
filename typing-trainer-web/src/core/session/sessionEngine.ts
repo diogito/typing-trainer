@@ -138,6 +138,55 @@ export class SessionEngine {
   }
 
   /**
+   * Compute live metrics from current keystrokes — pure function, no state mutation.
+   * Called on each keystroke during running sessions to provide real-time WPM/accuracy/duration.
+   */
+  computeLiveMetrics(endTime: number): Partial<SessionMetrics> {
+    const state = this.state;
+    if (!state.startTime || state.keystrokes.length === 0) {
+      return {
+        duration: 0,
+        totalKeystrokes: 0,
+        wpm: 0,
+        accuracy: 100,
+        errors: createErrorCount(),
+      };
+    }
+
+    const totalActiveMs =
+      (endTime - state.startTime) - state.pauseDuration;
+    const durationSeconds = Math.max(0.001, totalActiveMs / 1000);
+    const totalKeystrokes = state.keystrokes.length;
+    const totalErrors = state.keystrokes.filter((k) => k.error).length;
+
+    return {
+      duration: Math.round(durationSeconds * 100) / 100,
+      totalKeystrokes,
+      wpm: computeWPM(totalKeystrokes, durationSeconds),
+      accuracy: computeAccuracy(totalKeystrokes, totalErrors),
+      precision: computePrecision(totalKeystrokes, state.keystrokes.filter((k) => k.error === 'wrong-finger').length),
+      errors: (() => {
+        const errorCount = createErrorCount();
+        for (const keystroke of state.keystrokes) {
+          if (keystroke.error) {
+            const col = this.keyColumns[keystroke.scancode] ?? 1;
+            const dir = keystroke.direction === 'neutral' ? undefined : keystroke.direction;
+            recordError(
+              errorCount,
+              keystroke.scancode,
+              keystroke.finger,
+              col,
+              keystroke.layer,
+              dir,
+            );
+          }
+        }
+        return errorCount;
+      })(),
+    };
+  }
+
+  /**
    * Record a keystroke event.
    */
   recordKeystroke(event: KeystrokeEvent): SessionState {
