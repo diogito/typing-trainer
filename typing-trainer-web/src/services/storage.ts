@@ -1,5 +1,10 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { PersistedSession, UserPreferences, KeyboardLayout, PostureCalibration } from '@/types';
+import type {
+  PersistedSession,
+  UserPreferences,
+  KeyboardLayout,
+  PostureCalibration,
+} from '@/types';
 
 const DB_NAME = 'typing-trainer';
 const DB_VERSION = 2;

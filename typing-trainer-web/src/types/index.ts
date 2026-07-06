@@ -161,6 +161,62 @@ export const DEFAULT_POSTURE: PostureCalibration = {
   breakEnabled: true,
 };
 
+// Exercise types and levels
+export type ExerciseType =
+  | 'home-row'
+  | 'letters'
+  | 'symbols'
+  | 'code'
+  | 'spanish'
+  | 'free';
+
+export type TrainingLevel =
+  | 'beginner'
+  | 'basic'
+  | 'intermediate'
+  | 'advanced'
+  | 'expert';
+
+export type TrainingFocus =
+  | 'left-hand'
+  | 'right-hand'
+  | 'index'
+  | 'middle'
+  | 'ring'
+  | 'pinky'
+  | 'thumb'
+  | 'accuracy'
+  | 'speed'
+  | 'symbols'
+  | 'programming';
+
+export type TargetCharState =
+  | 'pending'
+  | 'current'
+  | 'correct'
+  | 'incorrect'
+  | 'corrected';
+
+export type RecommendationPriority = 'low' | 'medium' | 'high';
+
+export interface Exercise {
+  id: string;
+  title: string;
+  description: string;
+  level: TrainingLevel;
+  type: ExerciseType;
+  target: string;
+  focus: TrainingFocus[];
+  estimatedDurationSec?: number;
+}
+
+export interface TrainingRecommendation {
+  title: string;
+  reason: string;
+  exerciseId: string;
+  priority: RecommendationPriority;
+}
+
 // Finger color constants
 export const FINGER_COLORS: Record<Finger, string> = {
   pinky: '#ef4444',
