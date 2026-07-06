@@ -2,8 +2,8 @@
   "buildCommand": "tsc -b && vite build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
+  "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "framework": null
+  ]
 }
