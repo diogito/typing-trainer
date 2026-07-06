@@ -11,7 +11,12 @@ export type Finger =
 export type Hand = 'left' | 'right';
 
 // Types of errors detected during typing
-export type ErrorType = 'wrong-finger' | 'wrong-key' | 'missed' | 'double';
+export type ErrorType =
+  | 'wrong-finger'
+  | 'wrong-finger-zone'
+  | 'wrong-key'
+  | 'missed'
+  | 'double';
 
 // Physical keyboard key definition
 export interface KeyboardKey {
@@ -118,6 +123,8 @@ export interface PersistedSession {
   accuracy: number;
   precision: number;
   errors: ErrorCountByCategory;
+  exerciseId?: string;
+  exerciseAccuracy?: number;
   createdAt: number;
 }
 
