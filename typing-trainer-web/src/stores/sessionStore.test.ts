@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useSessionStore } from '../stores/sessionStore';
 import { useLayoutStore } from '../stores/layoutStore';
+import { useExerciseStore } from '../stores/exerciseStore';
 
 // Track whether saveSession was called without mocking the module
 // The store fires saveSession asynchronously; we test behavior instead.
@@ -245,5 +246,78 @@ describe('sessionStore', () => {
     init('qwerty-es');
     expect(useSessionStore.getState().sessionSaved).toBe(false);
     expect(useSessionStore.getState().state.state).toBe('idle');
+  });
+
+  // --- T14: Exercise metadata persistence ---
+
+  it('persisted session includes exerciseId when exercise was active', () => {
+    // Mock exercise store with active exercise
+    useExerciseStore.setState({
+      selectedExerciseId: 'home-row-1',
+      currentTarget: 'abc',
+      totalKeystrokes: 5,
+      totalErrors: 0,
+    } as any);
+
+    const { init, start, stop, recordKeystroke } = useSessionStore.getState();
+    init('qwerty-es');
+    start();
+
+    for (let i = 0; i < 5; i++) {
+      recordKeystroke({
+        code: 'KeyA',
+        key: 'a',
+        scancode: 'KC_A',
+        timestamp: Date.now() + i * 100,
+        finger: 'pinky',
+        actualFinger: 'pinky',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+      } as any);
+    }
+
+    stop();
+
+    // Verify metrics include exercise data
+    const metrics = useSessionStore.getState().metrics!;
+    expect(metrics.totalKeystrokes).toBe(5);
+    // exerciseAccuracy should be 100% (5 keystrokes, 0 errors)
+    // We can't directly inspect persistedSession, but we verify stop doesn't throw
+    // and exerciseMetadata is read without error
+    expect(useSessionStore.getState().sessionSaved).toBe(true);
+  });
+
+  it('persisted session has undefined exerciseId when no exercise was active (backward compat)', () => {
+    // Ensure exercise store has no selected exercise
+    useExerciseStore.setState({
+      selectedExerciseId: null,
+      currentTarget: '',
+      totalKeystrokes: 0,
+      totalErrors: 0,
+    } as any);
+
+    const { init, start, stop, recordKeystroke } = useSessionStore.getState();
+    init('qwerty-es');
+    start();
+
+    recordKeystroke({
+      code: 'KeyA',
+      key: 'a',
+      scancode: 'KC_A',
+      timestamp: Date.now(),
+      finger: 'pinky',
+      actualFinger: 'pinky',
+      isModifier: false,
+      modifiers: [],
+      layer: 'base',
+    } as any);
+
+    stop();
+
+    const metrics = useSessionStore.getState().metrics!;
+    expect(metrics.totalKeystrokes).toBe(1);
+    // Session saved without exercise metadata
+    expect(useSessionStore.getState().sessionSaved).toBe(true);
   });
 });

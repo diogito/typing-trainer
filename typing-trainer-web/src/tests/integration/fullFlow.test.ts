@@ -1,7 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useLayoutStore } from '../../stores/layoutStore';
 import { useKeyboardStore } from '../../stores/keyboardStore';
+import { useExerciseStore } from '../../stores/exerciseStore';
+import { validateKeystroke } from '../../lib/exerciseValidation';
+import { EXERCISE_CATALOG } from '../../data/exercises';
 import { FINGER_COLORS, type KeystrokeEvent } from '../../types';
 
 describe('Integration: Full session flow', () => {
@@ -164,5 +167,144 @@ describe('Integration: Finger colors', () => {
     expect(FINGER_COLORS.index).toBe('#22c55e');
     expect(FINGER_COLORS.thumb).toBe('#3b82f6');
     expect(FINGER_COLORS.other).toBe('#6b7280');
+  });
+});
+
+describe('Integration: Exercise-based training flow', () => {
+  beforeEach(() => {
+    const { init } = useSessionStore.getState();
+    init('qwerty-es');
+    useKeyboardStore.setState({ activeScancodes: new Set() });
+    useExerciseStore.setState({
+      selectedExerciseId: null,
+      currentTarget: '',
+      currentIndex: 0,
+      totalKeystrokes: 0,
+      totalErrors: 0,
+    } as any);
+  });
+
+  it('full exercise flow: select exercise → onKeystroke × N → verify exercise store state', () => {
+    const { selectExercise, onKeystroke, resetSession } = useExerciseStore.getState();
+
+    // Step 1: Select an exercise from catalog
+    selectExercise('home-row-1');
+    expect(useExerciseStore.getState().selectedExerciseId).toBe('home-row-1');
+
+    const exercise = EXERCISE_CATALOG.find((e) => e.id === 'home-row-1');
+    expect(exercise).toBeDefined();
+    expect(exercise?.target).toContain('asdf');
+
+    const exerciseText = exercise!.target;
+
+    // Step 2: Type the exercise text using onKeystroke
+    for (let i = 0; i < exerciseText.length; i++) {
+      const char = exerciseText[i];
+      const result = onKeystroke(`KC_${i}`, char);
+      if (result === null) {
+        // Exercise completed
+        break;
+      }
+      expect(result.expected).toBe(char);
+    }
+
+    // Verify exercise store tracked keystrokes
+    const exState = useExerciseStore.getState();
+    expect(exState.totalKeystrokes).toBeGreaterThan(0);
+    expect(exState.currentTarget).toBe(exerciseText);
+    expect(exState.totalErrors).toBe(0);
+
+    // Reset for next test
+    resetSession();
+  });
+
+  it('exercise flow with errors: tracks error count via onKeystroke', () => {
+    const { selectExercise, onKeystroke, resetSession } = useExerciseStore.getState();
+
+    selectExercise('home-row-1');
+    const exercise = EXERCISE_CATALOG.find((e) => e.id === 'home-row-1')!;
+    const exerciseText = exercise.target;
+
+    // Type first 2 keys correctly (indices 0,1)
+    onKeystroke('KC_A', exerciseText[0]);
+    onKeystroke('KC_S', exerciseText[1]);
+
+    // Introduce wrong keys (indices 2,3 → target 'd' and 'f')
+    onKeystroke('KC_X', 'x');  // wrong at index 2 (expecting 'd')
+    onKeystroke('KC_Y', 'y');  // wrong at index 3 (expecting 'f')
+
+    // Continue correctly at indices 4,5 (target ' ' and 'j')
+    onKeystroke('KC_SPACE', ' ');
+    onKeystroke('KC_J', 'j');
+
+    const exState = useExerciseStore.getState();
+    expect(exState.totalKeystrokes).toBe(6);
+    expect(exState.totalErrors).toBe(2);
+
+    resetSession();
+  });
+
+  it('validateKeystroke function works correctly with exercise text', () => {
+    const exercise = EXERCISE_CATALOG.find((e) => e.id === 'home-row-1')!;
+    const exerciseText = exercise.target;
+
+    // Correct key
+    const result1 = validateKeystroke(
+      exerciseText[0],
+      exerciseText[0],
+      'KC_A',
+    );
+    expect(result1.correct).toBe(true);
+    expect(result1.expected).toBe(exerciseText[0]);
+    expect(result1.actual).toBe(exerciseText[0]);
+
+    // Wrong key
+    const result2 = validateKeystroke(
+      exerciseText[0],
+      'x',
+      'KC_X',
+    );
+    expect(result2.correct).toBe(false);
+    expect(result2.expected).toBe(exerciseText[0]);
+    expect(result2.actual).toBe('x');
+  });
+
+  it('exercise store and session store work together: select → type → stop → exercise metadata', () => {
+    const { selectExercise, resetSession } = useExerciseStore.getState();
+    const { init, start, stop, recordKeystroke } = useSessionStore.getState();
+
+    selectExercise('home-row-1');
+
+    // Session store records keystrokes (simulating what TrainingPage does)
+    init('qwerty-es');
+    start();
+
+    // Simulate 5 correct keystrokes
+    for (let i = 0; i < 5; i++) {
+      recordKeystroke({
+        code: `Key${String.fromCharCode(65 + i)}`,
+        key: String.fromCharCode(97 + i),
+        scancode: `KC_${String.fromCharCode(65 + i)}`,
+        timestamp: Date.now() + i * 100,
+        finger: 'index',
+        actualFinger: 'index',
+        isModifier: false,
+        modifiers: [],
+        layer: 'base',
+      } as KeystrokeEvent);
+    }
+
+    stop();
+
+    // Both stores should have state
+    const exState = useExerciseStore.getState();
+    const metrics = useSessionStore.getState().metrics!;
+
+    expect(exState.selectedExerciseId).toBe('home-row-1');
+    expect(exState.totalKeystrokes).toBe(0); // exercise store not called in this test
+    expect(metrics.totalKeystrokes).toBe(5);
+    expect(metrics.accuracy).toBe(100);
+
+    resetSession();
   });
 });
