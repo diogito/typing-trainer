@@ -8,7 +8,23 @@ import type {
 import { SessionEngine } from '@/core/session/sessionEngine';
 import { useKeyboardStore } from './keyboardStore';
 import { useLayoutStore } from './layoutStore';
+import { useExerciseStore } from './exerciseStore';
 import { storageService } from '@/services/storage';
+
+/** Safely get exercise store state without React hook — avoids circular import issues. */
+function getExerciseMetadata() {
+  try {
+    const es = useExerciseStore.getState();
+    return {
+      exerciseId: es.selectedExerciseId ?? null,
+      exerciseAccuracy: (es.totalKeystrokes + es.totalErrors > 0)
+        ? (es.totalKeystrokes / (es.totalKeystrokes + es.totalErrors)) * 100
+        : null,
+    };
+  } catch {
+    return { exerciseId: null, exerciseAccuracy: null };
+  }
+}
 
 interface SessionSlice {
   state: SessionState;
@@ -83,6 +99,7 @@ export const useSessionStore = create<SessionSlice>((set, get) => ({
 
     // Build and persist session record
     if (metrics && state.startTime) {
+      const { exerciseId, exerciseAccuracy } = getExerciseMetadata();
       const persistedSession: PersistedSession = {
         id: state.id,
         layoutId: state.layoutId,
@@ -95,6 +112,9 @@ export const useSessionStore = create<SessionSlice>((set, get) => ({
         precision: metrics.precision,
         errors: metrics.errors,
         createdAt: state.startTime,
+        // Exercise metadata (optional for backward compat)
+        ...(exerciseId && { exerciseId }),
+        ...(exerciseAccuracy !== null && { exerciseAccuracy }),
       };
 
       set({ state, metrics, sessionSaved: true });
