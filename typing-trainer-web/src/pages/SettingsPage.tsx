@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Select } from '@/components/ui/select';
 import { useUISlice } from '@/stores/uiStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { storageService } from '@/services/storage';
+import { layoutRegistry } from '@/core/keyboard/layoutRegistry';
 
 export function SettingsPage() {
   const preferences = useUISlice((s) => s.preferences);
@@ -111,12 +112,25 @@ export function SettingsPage() {
           <div className="space-y-3">
             <label className="text-sm font-medium">Selected Layout</label>
             <Select
-              options={[
-                { value: 'qwerty-es', label: 'QWERTY (ES)' },
-                { value: 'colemak', label: 'Colemak' },
-                { value: 'colemak-dh', label: 'Colemak DH' },
-                { value: 'dvorak', label: 'Dvorak' },
-              ]}
+              options={useMemo(() => {
+                const builtinIds = layoutRegistry.getLayoutIds();
+                const customIds = Object.keys(useLayoutStore.getState().customLayouts);
+                const allIds = [...builtinIds, ...customIds];
+                // Deduplicate while preserving order
+                const seen = new Set<string>();
+                const unique = allIds.filter(id => {
+                  if (seen.has(id)) return false;
+                  seen.add(id);
+                  return true;
+                });
+                return unique.map(id => {
+                  const layout = layoutRegistry.get(id);
+                  return {
+                    value: id,
+                    label: layout?.name ?? id,
+                  };
+                });
+              }, [])}
               value={layoutName}
               onChange={setLayoutName}
             />
