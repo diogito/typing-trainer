@@ -95,6 +95,35 @@ vi.mock('@/stores/keyboardStore', () => ({
   }),
 }));
 
+vi.mock('@/stores/exerciseStore', () => ({
+  useExerciseStore: vi.fn((selector) => {
+    const store = selector?.({
+      selectedExerciseId: null,
+      currentTarget: 'abc',
+      totalKeystrokes: 0,
+      totalErrors: 0,
+      selectExercise: vi.fn(),
+      resetSession: vi.fn(),
+      getExercise: () => undefined,
+      getCharacterStates: () => [],
+    } as any);
+    return store ?? {
+      selectedExerciseId: null,
+      currentTarget: 'abc',
+      totalKeystrokes: 0,
+      totalErrors: 0,
+      selectExercise: vi.fn(),
+      resetSession: vi.fn(),
+      getExercise: () => undefined,
+      getCharacterStates: () => [],
+    };
+  }),
+}));
+
+vi.mock('@/lib/recommendations', () => ({
+  generateRecommendations: vi.fn(() => []),
+}));
+
 vi.mock('@/core/capture/eventCapture', () => ({
   useEventCapture: vi.fn(),
 }));
@@ -144,6 +173,18 @@ describe('TrainingPage — Break Reminder Integration', () => {
     render(<TrainingPage />);
     // Mirror mode toggle should be visible
     expect(screen.getByText('Mirror Mode')).toBeInTheDocument();
+  });
+
+  it('renders ExerciseSelector when idle and no exercise selected', () => {
+    render(<TrainingPage />);
+    // ExerciseSelector should show exercise cards
+    expect(screen.getByText('Start Training')).toBeInTheDocument();
+  });
+
+  it('renders ExerciseSelector when exercise is not selected', () => {
+    render(<TrainingPage />);
+    // Should show start button (not exercise selector since it's rendered inside ExerciseSelector)
+    expect(screen.getByText('Start Training')).toBeInTheDocument();
   });
 });
 

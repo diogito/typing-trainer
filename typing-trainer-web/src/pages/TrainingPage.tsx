@@ -6,13 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { BreakReminderOverlay } from '@/components/BreakReminderOverlay';
+import { ExerciseSelector } from '@/components/ExerciseSelector';
+import { ExerciseDisplay } from '@/components/ExerciseDisplay';
+import { PostSessionSummary } from '@/components/PostSessionSummary';
 import { useBreakReminder } from '@/hooks/useBreakReminder';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useUISlice } from '@/stores/uiStore';
 import { useKeyboardStore } from '@/stores/keyboardStore';
+import { useExerciseStore } from '@/stores/exerciseStore';
 import { useEventCapture } from '@/core/capture/eventCapture';
-import type { KeystrokeEvent } from '@/types';
+import { generateRecommendations } from '@/lib/recommendations';
+import type { KeystrokeEvent, SessionMetrics, TrainingRecommendation } from '@/types';
 
 export function TrainingPage() {
   const session = useSessionStore((s) => s.state);
@@ -37,8 +42,26 @@ export function TrainingPage() {
 
   const recordError = useKeyboardStore((s) => s.recordError);
 
+  // Exercise store
+  const selectedExerciseId = useExerciseStore((s) => s.selectedExerciseId);
+  const selectExercise = useExerciseStore((s) => s.selectExercise);
+  const resetSession = useExerciseStore((s) => s.resetSession);
+  const getExercise = useExerciseStore((s) => s.getExercise);
+  const getCharacterStates = useExerciseStore((s) => s.getCharacterStates);
+  const getTarget = useExerciseStore((s) => s.currentTarget);
+  const exerciseAccuracy = useExerciseStore((s) =>
+    s.totalKeystrokes + s.totalErrors > 0
+      ? (s.totalKeystrokes / (s.totalKeystrokes + s.totalErrors)) * 100
+      : undefined
+  );
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [activeLayoutId, setActiveLayoutId] = useState('');
+
+  // Post-session summary state
+  const [showSummary, setShowSummary] = useState(false);
+  const [summaryMetrics, setSummaryMetrics] = useState<SessionMetrics | null>(null);
+  const [summaryRecommendations, setSummaryRecommendations] = useState<TrainingRecommendation[] | undefined>(undefined);
 
   // Break reminder integration
   const breakReminder = useBreakReminder({
@@ -67,14 +90,31 @@ export function TrainingPage() {
   // Reset mirror mode when starting a new session
   const handleStart = useCallback(() => {
     resetMirrorMode();
+    if (selectedExerciseId) {
+      resetSession();
+    }
     breakReminder.start();
     start();
-  }, [start, resetMirrorMode, breakReminder]);
+  }, [start, resetMirrorMode, breakReminder, selectedExerciseId, resetSession]);
 
   const handleStop = useCallback(() => {
     stop();
     breakReminder.reset();
-  }, [stop, breakReminder]);
+
+    // Show post-session summary if exercise was active
+    if (selectedExerciseId && session.metrics) {
+      const metrics = session.metrics;
+      setSummaryMetrics(metrics);
+      setSummaryRecommendations(generateRecommendations({
+        wpm: metrics.wpm,
+        accuracy: metrics.accuracy,
+        totalKeystrokes: metrics.totalKeystrokes,
+        errors: metrics.errors.byKey,
+        exerciseType: getExercise()?.type ?? 'home-row',
+      }));
+      setShowSummary(true);
+    }
+  }, [stop, breakReminder, selectedExerciseId, session.metrics, getExercise]);
 
   const handlePause = useCallback(() => {
     if (session.state === 'running') {
@@ -97,15 +137,31 @@ export function TrainingPage() {
     }
   }, [recordKeystroke, recordError, mirrorMode.enabled, incrementMirrorProgress]);
 
+  // Exercise validation callback for useEventCapture
+  const handleValidation = useCallback(
+    (_index: number, correct: boolean, _expected: string, _actual: string) => {
+      if (correct) {
+        // exerciseStore.onKeystroke handles character tracking
+      }
+      // exerciseStore.onKeystroke is called via the onKeystroke path
+    },
+    [],
+  );
+
   // Get finger map from layout
   const fingerMap = layout?.fingerMap ?? {};
   const enabled = session.state === 'running';
+
+  const exerciseActive = !!selectedExerciseId;
+  const targetText = exerciseActive ? getTarget : undefined;
 
   useEventCapture({
     onKeystroke: handleKeystroke,
     fingerMap,
     activeLayer,
     enabled,
+    targetText,
+    onValidation: exerciseActive ? handleValidation : undefined,
   });
 
   // Compute displayed stats
@@ -133,6 +189,22 @@ export function TrainingPage() {
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
+      {/* Exercise selector */}
+      {session.state === 'idle' && !selectedExerciseId && (
+        <ExerciseSelector onSelect={selectExercise} />
+      )}
+
+      {/* Exercise display */}
+      {selectedExerciseId && session.state === 'idle' && (
+        <div className="max-w-4xl mx-auto w-full">
+          <ExerciseDisplay
+            targetText={getTarget}
+            charStates={getCharacterStates()}
+            className="text-center"
+          />
+        </div>
+      )}
+
       {/* Stats bar */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <StatCard label="WPM" value={wpm} suffix=" wpm" />
@@ -236,6 +308,19 @@ export function TrainingPage() {
           other: '#6b7280',
         }} />
       </div>
+
+      {/* Post-session summary overlay */}
+      {showSummary && summaryMetrics && (
+        <div className="max-w-4xl mx-auto w-full">
+          <PostSessionSummary
+            metrics={summaryMetrics}
+            exerciseTitle={getExercise()?.title ?? 'Free Mode'}
+            exerciseAccuracy={exerciseAccuracy}
+            recommendations={summaryRecommendations ?? []}
+            onClose={() => setShowSummary(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }
