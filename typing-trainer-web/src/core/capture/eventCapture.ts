@@ -8,6 +8,9 @@ interface UseEventCaptureOptions {
   fingerMap: FingerMap;
   activeLayer: string;
   enabled: boolean;
+  // NEW (both optional):
+  targetText?: string;
+  onValidation?: (index: number, correct: boolean, expected: string, actual: string) => void;
 }
 
 const MODIFIER_KEYS = new Set([
@@ -28,10 +31,14 @@ export function useEventCapture({
   fingerMap,
   activeLayer,
   enabled,
+  targetText,
+  onValidation,
 }: UseEventCaptureOptions) {
   const pressedKeysRef = useRef<Set<string>>(new Set());
   const pressTimesRef = useRef<Map<string, number>>(new Map());
   const modifiersRef = useRef<string[]>([]);
+  const currentIndexRef = useRef(0);
+  const targetCompletedRef = useRef(false);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -66,6 +73,34 @@ export function useEventCapture({
 
       // Determine expected finger
       const expectedFinger = getExpectedFinger(kcCode, fingerMap);
+
+      // Exercise validation: if targetText provided, validate against it
+      if (targetText && !targetCompletedRef.current && currentIndexRef.current < targetText.length) {
+        const pressedKey = event.key;
+        const wasBackspace = domCode === 'Backspace';
+        let actualChar = pressedKey;
+        let correct = false;
+
+        if (wasBackspace) {
+          actualChar = '<backspace>';
+          correct = false;
+          if (currentIndexRef.current > 0) {
+            currentIndexRef.current--;
+          }
+        } else {
+          correct = pressedKey === targetText[currentIndexRef.current];
+          currentIndexRef.current++;
+        }
+
+        if (currentIndexRef.current >= targetText.length) {
+          targetCompletedRef.current = true;
+        }
+
+        // Expected char: for backspace it's the char we went back to; for normal keys it's the char we just typed
+        const expectedChar = targetText[wasBackspace ? currentIndexRef.current : currentIndexRef.current - 1] || '';
+
+        onValidation?.(currentIndexRef.current, correct, expectedChar, actualChar);
+      }
 
       // Optimistic model: assume user uses the expected finger
       const actualFinger = expectedFinger;
@@ -103,7 +138,7 @@ export function useEventCapture({
       onKeystroke?.(keystroke);
       event.preventDefault();
     },
-    [enabled, fingerMap, activeLayer, onKeystroke],
+    [enabled, fingerMap, activeLayer, onKeystroke, targetText, onValidation],
   );
 
   const handleKeyUp = useCallback(
@@ -163,6 +198,8 @@ export function useEventCapture({
     pressedKeysRef.current.clear();
     pressTimesRef.current.clear();
     modifiersRef.current = [];
+    currentIndexRef.current = 0;
+    targetCompletedRef.current = false;
   }, []);
 
   return { reset };
