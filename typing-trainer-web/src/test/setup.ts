@@ -23,6 +23,3 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
-
-// Expose testing utilities globally in test files
-// (we use vitest globals, not jest globals)

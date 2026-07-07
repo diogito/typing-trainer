@@ -1,4 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { mockStorageService, resetMockStorage } from '../test/mock-storage';
+
+vi.mock('@/services/storage', () => ({
+  storageService: mockStorageService,
+}));
+
 import { useSessionStore } from '../stores/sessionStore';
 import { useLayoutStore } from '../stores/layoutStore';
 import { useExerciseStore } from '../stores/exerciseStore';
@@ -10,6 +16,7 @@ const originalConsoleError = console.error;
 
 describe('sessionStore', () => {
   beforeEach(() => {
+    resetMockStorage();
     // Intercept console.error to suppress IndexedDB errors in tests
     console.error = vi.fn();
 
@@ -319,5 +326,77 @@ describe('sessionStore', () => {
     expect(metrics.totalKeystrokes).toBe(1);
     // Session saved without exercise metadata
     expect(useSessionStore.getState().sessionSaved).toBe(true);
+  });
+
+  // --- T14: Legacy session backward compatibility ---
+
+  it('legacy session without exerciseId is still loadable from storage', async () => {
+    const { storageService } = await import('@/services/storage');
+    const testId = `legacy-test-${Date.now()}`;
+
+    // Create a legacy session (no exerciseId, no exerciseAccuracy)
+    const legacySession = {
+      id: testId,
+      layoutId: 'qwerty-es',
+      startTime: Date.now(),
+      endTime: Date.now() + 1000,
+      duration: 1000,
+      totalKeystrokes: 10,
+      wpm: 30,
+      accuracy: 95,
+      precision: 0.95,
+      errors: {},
+      createdAt: Date.now(),
+      // No exerciseId or exerciseAccuracy — legacy format
+    };
+
+    // Save legacy session
+    await storageService.saveSession(legacySession as any);
+
+    // Retrieve it — should not throw, should be loadable
+    const loaded = await storageService.getSession(testId);
+    expect(loaded).not.toBeNull();
+    expect(loaded!.id).toBe(testId);
+    expect(loaded!.totalKeystrokes).toBe(10);
+
+    // exerciseId should be undefined (optional field)
+    expect((loaded as any).exerciseId).toBeUndefined();
+    expect((loaded as any).exerciseAccuracy).toBeUndefined();
+
+    // Clean up
+    await storageService.deleteSession(testId);
+  });
+
+  it('session with exerciseId loads correctly and retains exercise metadata', async () => {
+    const { storageService } = await import('@/services/storage');
+    const testId = `exercise-test-${Date.now()}`;
+
+    const exerciseSession = {
+      id: testId,
+      layoutId: 'qwerty-es',
+      startTime: Date.now(),
+      endTime: Date.now() + 5000,
+      duration: 5000,
+      totalKeystrokes: 20,
+      wpm: 40,
+      accuracy: 85,
+      precision: 0.85,
+      errors: {},
+      createdAt: Date.now(),
+      exerciseId: 'home-row-1',
+      exerciseAccuracy: 85,
+    };
+
+    // Save session with exercise metadata
+    await storageService.saveSession(exerciseSession as any);
+
+    // Retrieve — should retain exercise metadata
+    const loaded = await storageService.getSession(testId);
+    expect(loaded).not.toBeNull();
+    expect((loaded as any).exerciseId).toBe('home-row-1');
+    expect((loaded as any).exerciseAccuracy).toBe(85);
+
+    // Clean up
+    await storageService.deleteSession(testId);
   });
 });

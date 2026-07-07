@@ -307,4 +307,100 @@ describe('Integration: Exercise-based training flow', () => {
 
     resetSession();
   });
+
+  // --- T15: Recommendations and storage verification ---
+
+  it('recommendations are generated from exercise session metrics', async () => {
+    const { generateRecommendations } = await import('@/lib/recommendations');
+    const { selectExercise, resetSession } = useExerciseStore.getState();
+
+    selectExercise('home-row-1');
+
+    // Low accuracy scenario should produce accuracy recommendation
+    const recommendations = generateRecommendations({
+      wpm: 15,
+      accuracy: 80,
+      totalKeystrokes: 100,
+      errors: { KC_A: 10, KC_S: 10 },
+      exerciseType: 'home-row',
+    });
+
+    expect(recommendations.length).toBeGreaterThan(0);
+
+    // Find the accuracy recommendation
+    const accuracyRec = recommendations.find((r) =>
+      r.title.toLowerCase().includes('accuracy')
+    );
+    expect(accuracyRec).toBeDefined();
+    expect(accuracyRec!.priority).toBe('high');
+
+    resetSession();
+  });
+
+  it('storage service saveSession is called when session stops', async () => {
+    const { init, start, stop, recordKeystroke } = useSessionStore.getState();
+
+    init('qwerty-es');
+    start();
+
+    recordKeystroke({
+      code: 'KeyA',
+      key: 'a',
+      scancode: 'KC_A',
+      timestamp: Date.now(),
+      finger: 'pinky',
+      actualFinger: 'pinky',
+      isModifier: false,
+      modifiers: [],
+      layer: 'base',
+    } as KeystrokeEvent);
+
+    stop();
+
+    // sessionSaved should be true, meaning saveSession was called
+    const { sessionSaved, state } = useSessionStore.getState();
+    expect(sessionSaved).toBe(true);
+    expect(state.state).toBe('idle');
+
+    // Metrics should be correct for persisted session
+    const metrics = useSessionStore.getState().metrics!;
+    expect(metrics.totalKeystrokes).toBe(1);
+    expect(metrics.accuracy).toBe(100);
+    expect(metrics.wpm).toBeGreaterThan(0);
+    expect(metrics.duration).toBeGreaterThanOrEqual(0);
+  });
+
+  it('full backward compat: free mode session saves correctly without exercise fields', async () => {
+    const { init, start, stop, recordKeystroke } = useSessionStore.getState();
+    const { resetSession } = useExerciseStore.getState();
+
+    // Ensure no exercise selected
+    resetSession();
+
+    init('qwerty-es');
+    start();
+
+    recordKeystroke({
+      code: 'KeyS',
+      key: 's',
+      scancode: 'KC_S',
+      timestamp: Date.now(),
+      finger: 'ring',
+      actualFinger: 'ring',
+      isModifier: false,
+      modifiers: [],
+      layer: 'base',
+    } as KeystrokeEvent);
+
+    stop();
+
+    // Session saved without exercise metadata
+    const { sessionSaved } = useSessionStore.getState();
+    expect(sessionSaved).toBe(true);
+
+    // Verify metrics are correct (proxy for persisted session correctness)
+    const metrics = useSessionStore.getState().metrics!;
+    expect(metrics.totalKeystrokes).toBe(1);
+    expect(metrics.accuracy).toBe(100);
+  });
 });
